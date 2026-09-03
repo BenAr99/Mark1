@@ -24,12 +24,12 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx ng build --base-href /mark1/
-      - run: touch dist/mark1/browser/.nojekyll
+      - run: npx ng build --base-href /Mark1/
+      - run: touch dist/Mark1/browser/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/mark1/browser
+          path: dist/Mark1/browser
 
   deploy:
     needs: build
