@@ -1,0 +1,34 @@
+<div class="orders">
+  <header class="orders__header">
+    <div>
+      <h1 class="orders__title">DentalFlow</h1>
+      <p class="orders__subtitle">{{ clinicName }}</p>
+    </div>
+    <button type="button" class="orders__close" aria-label="Закрыть">✕</button>
+  </header>
+
+  <div class="orders__tabs" role="tablist">
+    @for (filter of filters; track filter.value) {
+      <button
+        type="button"
+        role="tab"
+        class="orders__tab"
+        [class.orders__tab--active]="activeFilter() === filter.value"
+        [attr.aria-selected]="activeFilter() === filter.value"
+        (click)="setFilter(filter.value)"
+      >
+        {{ filter.label }}
+      </button>
+    }
+  </div>
+
+  <div class="orders__list">
+    @for (order of filteredOrders(); track order.id) {
+      <app-order-card [order]="order" />
+    }
+  </div>
+
+  <div class="orders__footer">
+    <button type="button" class="orders__new-order" (click)="createOrder()">Новый заказ</button>
+  </div>
+</div>

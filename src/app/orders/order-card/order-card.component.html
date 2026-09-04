@@ -1,0 +1,25 @@
+<article class="card">
+  <header class="card__top">
+    <h3 class="card__name">{{ order().patientName }}</h3>
+    <app-order-status-badge [status]="order().status" />
+  </header>
+
+  <div class="card__work">
+    <ul class="card__teeth">
+      @for (tooth of order().teeth; track tooth) {
+        <li class="card__tooth">{{ tooth }}</li>
+      }
+    </ul>
+    <span class="card__work-type">{{ order().workType }}</span>
+  </div>
+
+  <footer class="card__bottom">
+    <span class="card__due">Срок: {{ order().dueDate }}</span>
+    <span class="card__assignee">
+      {{ order().assignee }}
+      @if (order().unreadCount) {
+        <span class="card__unread">{{ order().unreadCount }}</span>
+      }
+    </span>
+  </footer>
+</article>

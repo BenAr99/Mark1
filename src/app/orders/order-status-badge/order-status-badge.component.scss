@@ -1,0 +1,29 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &[data-status='in_progress'] {
+    background: #fff2e0;
+    color: #ff9500;
+  }
+
+  &[data-status='ready'] {
+    background: #e3f8ea;
+    color: #2fb350;
+  }
+
+  &[data-status='accepted'] {
+    background: #f1e9fb;
+    color: #af52de;
+  }
+
+  &[data-status='sent'] {
+    background: #e8f4fd;
+    color: #2481cc;
+  }
+}

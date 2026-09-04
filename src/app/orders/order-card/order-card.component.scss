@@ -1,0 +1,89 @@
+:host {
+  display: block;
+}
+
+.card {
+  background: var(--tg-card-bg-color, #ffffff);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.card__name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card__work {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.card__teeth {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex-shrink: 0;
+}
+
+.card__tooth {
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: var(--tg-theme-secondary-bg-color, #f1f1f1);
+  color: var(--tg-theme-link-color, #2481cc);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.card__work-type {
+  font-size: 14px;
+  color: var(--tg-theme-text-color, #000000);
+}
+
+.card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--tg-theme-secondary-bg-color, #f1f1f1);
+  font-size: 13px;
+}
+
+.card__due {
+  color: var(--tg-theme-hint-color, #999999);
+}
+
+.card__assignee {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tg-theme-text-color, #000000);
+}
+
+.card__unread {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 100px;
+  background: var(--tg-theme-link-color, #2481cc);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+}
