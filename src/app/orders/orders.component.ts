@@ -1,49 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { OrderCardComponent } from './order-card/order-card.component';
-import { Order } from './order.model';
+import { OrdersService } from './orders.service';
 
 type OrdersFilter = 'all' | 'active' | 'ready';
-
-const MOCK_ORDERS: Order[] = [
-  {
-    id: '1',
-    patientName: 'Иванов А. П.',
-    status: 'in_progress',
-    teeth: [16, 17],
-    workType: 'Металлокерамическая коронка, 2 ед.',
-    dueDate: '12 сент.',
-    assignee: 'Р. Ахметов',
-    unreadCount: 2,
-  },
-  {
-    id: '2',
-    patientName: 'Петрова М. С.',
-    status: 'ready',
-    teeth: [24],
-    workType: 'Винир E-max',
-    dueDate: '9 сент.',
-    assignee: 'Р. Ахметов',
-  },
-  {
-    id: '3',
-    patientName: 'Соколов Д. В.',
-    status: 'accepted',
-    teeth: [36, 37, 38],
-    workType: 'Бюгельный протез',
-    dueDate: '18 сент.',
-    assignee: 'А. Гизатуллин',
-  },
-  {
-    id: '4',
-    patientName: 'Кузнецова Е. А.',
-    status: 'sent',
-    teeth: [11, 21],
-    workType: 'Цирконий, 2 ед.',
-    dueDate: '21 сент.',
-    assignee: 'Р. Ахметов',
-    unreadCount: 1,
-  },
-];
 
 @Component({
   selector: 'app-orders',
@@ -53,6 +13,9 @@ const MOCK_ORDERS: Order[] = [
   templateUrl: './orders.component.html',
 })
 export class OrdersComponent {
+  private readonly router = inject(Router);
+  private readonly ordersService = inject(OrdersService);
+
   protected readonly clinicName = 'Клиника «Дента-М»';
 
   protected readonly filters: { value: OrdersFilter; label: string }[] = [
@@ -61,7 +24,7 @@ export class OrdersComponent {
     { value: 'ready', label: 'Готово' },
   ];
 
-  private readonly orders = signal<Order[]>(MOCK_ORDERS);
+  private readonly orders = this.ordersService.orders;
   protected readonly activeFilter = signal<OrdersFilter>('all');
 
   protected readonly filteredOrders = computed(() => {
@@ -79,6 +42,6 @@ export class OrdersComponent {
   }
 
   createOrder(): void {
-    // TODO: navigate to the new order flow
+    this.router.navigate(['/new-order']);
   }
 }

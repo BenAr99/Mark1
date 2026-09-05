@@ -1,0 +1,203 @@
+<div class="new-order">
+  <header class="new-order__header">
+    <button type="button" class="new-order__icon-btn" aria-label="Назад" (click)="leave()">
+      ←
+    </button>
+
+    <div class="new-order__title-block">
+      <h1 class="new-order__title">Новый заказ</h1>
+      <p class="new-order__subtitle">{{ statusLabel() }}</p>
+    </div>
+
+    <button type="button" class="new-order__icon-btn" aria-label="Закрыть" (click)="leave()">
+      ✕
+    </button>
+  </header>
+
+  <section class="new-order__section">
+    <h2 class="new-order__section-title">Пациент</h2>
+    <div class="new-order__row">
+      <span class="new-order__row-label">ФИО</span>
+      <input
+        type="text"
+        class="new-order__row-input"
+        placeholder="Выбрать пациента"
+        [value]="draft().patientName"
+        (input)="setPatientName($any($event.target).value)"
+      />
+    </div>
+  </section>
+
+  <section class="new-order__section">
+    <h2 class="new-order__section-title">Зубы · FDI</h2>
+    <div class="new-order__teeth-row">
+      <ul class="new-order__teeth">
+        @for (tooth of sortedTeeth(); track tooth) {
+          <li class="new-order__tooth" (click)="removeTooth(tooth)">{{ tooth }} ✕</li>
+        } @empty {
+          <span class="new-order__placeholder">Не выбраны</span>
+        }
+      </ul>
+      <button type="button" class="new-order__link" (click)="toggleToothPicker()">
+        Выбрать на схеме ›
+      </button>
+    </div>
+
+    @if (showToothPicker()) {
+      <div class="new-order__tooth-picker">
+        <p class="new-order__arch-label">Верхняя челюсть</p>
+        <div class="new-order__arch">
+          @for (tooth of upperTeeth; track tooth) {
+            <button
+              type="button"
+              class="new-order__tooth-btn"
+              [class.new-order__tooth-btn--active]="draft().teeth.includes(tooth)"
+              (click)="toggleTooth(tooth)"
+            >
+              {{ tooth }}
+            </button>
+          }
+        </div>
+        <p class="new-order__arch-label">Нижняя челюсть</p>
+        <div class="new-order__arch">
+          @for (tooth of lowerTeeth; track tooth) {
+            <button
+              type="button"
+              class="new-order__tooth-btn"
+              [class.new-order__tooth-btn--active]="draft().teeth.includes(tooth)"
+              (click)="toggleTooth(tooth)"
+            >
+              {{ tooth }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  <section class="new-order__section">
+    <h2 class="new-order__section-title">Работа</h2>
+
+    <div class="new-order__row">
+      <span class="new-order__row-label">Вид работы</span>
+      <select
+        class="new-order__row-select"
+        [value]="draft().workType"
+        (change)="setWorkType($any($event.target).value)"
+      >
+        <option value="" disabled>Выбрать ›</option>
+        @for (type of workTypes; track type) {
+          <option [value]="type">{{ type }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="new-order__row">
+      <span class="new-order__row-label">Срок выполнения</span>
+      <input
+        type="date"
+        class="new-order__row-input"
+        [value]="draft().dueDate"
+        (change)="setDueDate($any($event.target).value)"
+      />
+    </div>
+
+    <div class="new-order__row">
+      <span class="new-order__row-label">Оттенок</span>
+      <select
+        class="new-order__row-select"
+        [value]="draft().shade"
+        (change)="setShade($any($event.target).value)"
+      >
+        <option value="" disabled>Выбрать ›</option>
+        @for (shade of shades; track shade) {
+          <option [value]="shade">{{ shade }}</option>
+        }
+      </select>
+    </div>
+  </section>
+
+  <section class="new-order__section">
+    <h2 class="new-order__section-title">Техник</h2>
+
+    <button type="button" class="new-order__technician" (click)="toggleTechnicianPicker()">
+      @if (draft().technician; as technician) {
+        <span class="new-order__avatar">{{ technician.name[0] }}</span>
+        <span class="new-order__technician-info">
+          <span class="new-order__technician-name">{{ technician.name }}</span>
+          <span class="new-order__technician-lab">
+            {{ technician.lab }} · {{ technician.ordersCount }} заказа
+          </span>
+        </span>
+      } @else {
+        <span class="new-order__placeholder">Выбрать техника</span>
+      }
+      <span class="new-order__chevron">›</span>
+    </button>
+
+    @if (showTechnicianPicker()) {
+      <div class="new-order__technician-list">
+        @for (technician of technicians; track technician.id) {
+          <button
+            type="button"
+            class="new-order__technician-option"
+            (click)="selectTechnician(technician)"
+          >
+            <span class="new-order__avatar">{{ technician.name[0] }}</span>
+            <span class="new-order__technician-info">
+              <span class="new-order__technician-name">{{ technician.name }}</span>
+              <span class="new-order__technician-lab">
+                {{ technician.lab }} · {{ technician.ordersCount }} заказа
+              </span>
+            </span>
+          </button>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="new-order__section">
+    <h2 class="new-order__section-title">Файлы и сканы</h2>
+    <div class="new-order__files">
+      @for (file of draft().files; track file.id) {
+        <div class="new-order__file" [attr.data-kind]="file.kind">
+          <span class="new-order__file-remove" (click)="removeFile(file.id)">✕</span>
+          <span class="new-order__file-kind">{{
+            file.kind === 'stl' ? 'STL' : file.kind === 'image' ? 'JPG' : 'FILE'
+          }}</span>
+          <span class="new-order__file-name">{{ file.name }}</span>
+        </div>
+      }
+      <button type="button" class="new-order__file-add" (click)="fileInput.click()">+</button>
+      <input
+        #fileInput
+        type="file"
+        multiple
+        hidden
+        (change)="addFiles($any($event.target).files); $any($event.target).value = ''"
+      />
+    </div>
+  </section>
+
+  <section class="new-order__section">
+    <h2 class="new-order__section-title">Комментарий</h2>
+    <textarea
+      class="new-order__comment"
+      rows="3"
+      placeholder="Например: уступ 0.8 мм, контакт с соседними плотный…"
+      [value]="draft().comment"
+      (input)="setComment($any($event.target).value)"
+    ></textarea>
+  </section>
+
+  <footer class="new-order__footer">
+    <button
+      type="button"
+      class="new-order__submit"
+      [disabled]="!canSubmit() || submitting()"
+      (click)="submit()"
+    >
+      {{ submitting() ? 'Отправка…' : 'Отправить заказ технику' }}
+    </button>
+  </footer>
+</div>

@@ -27,4 +27,9 @@ export class TelegramService {
   alert(message: string): void {
     this.tg ? this.tg.showAlert(message) : window.alert(message);
   }
+
+  confirm(message: string): Promise<boolean> {
+    if (!this.tg) return Promise.resolve(window.confirm(message));
+    return new Promise((resolve) => this.tg!.showConfirm(message, resolve));
+  }
 }

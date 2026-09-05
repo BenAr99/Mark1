@@ -21,6 +21,7 @@ declare global {
     onEvent(event: string, cb: () => void): void;
     offEvent(event: string, cb: () => void): void;
     showAlert(message: string, cb?: () => void): void;
+    showConfirm(message: string, cb: (confirmed: boolean) => void): void;
     MainButton: {
       setText(text: string): TelegramWebApp['MainButton'];
       show(): void;
