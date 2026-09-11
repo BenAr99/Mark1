@@ -1,0 +1,150 @@
+@use '../../shared/screen' as screen;
+
+@include screen.host;
+
+.chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 10px;
+  border-radius: var(--df-radius-card);
+  background: var(--df-card-bg);
+}
+
+.chart__labels {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--df-muted);
+}
+
+.chart__arch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.chart__quadrant {
+  display: flex;
+  flex: 1 0 0;
+  gap: 2px;
+  min-width: 0;
+}
+
+.chart__midline {
+  flex-shrink: 0;
+  width: 1px;
+  height: 34px;
+  background: #d8d8de;
+}
+
+.chart__rule {
+  width: 100%;
+  height: 1px;
+  background: #e6e6eb;
+}
+
+.tooth {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #e2e2e8;
+  border-radius: 5px;
+  background: #f0f0f4;
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease;
+
+  &--on {
+    border-color: var(--df-accent);
+    background: var(--df-accent);
+
+    .tooth__num {
+      color: #ffffff;
+    }
+  }
+}
+
+.tooth__crown {
+  display: block;
+  flex-shrink: 0;
+  width: 10px;
+  height: 9px;
+}
+
+.tooth__num {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--df-text-tertiary);
+}
+
+.hint {
+  width: 100%;
+  margin: 0;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--df-hint);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 14px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px 6px 10px;
+  border: 0;
+  border-radius: var(--df-radius-chip);
+  background: var(--df-accent-bg);
+  cursor: pointer;
+}
+
+.chip__num {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--df-accent-ink);
+}
+
+.chip__name {
+  font-size: 11px;
+  font-weight: 400;
+  color: #7fa8d4;
+}
+
+.chip__x {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  color: #8fb6de;
+}
+
+.radio {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid #d1d1d6;
+  border-radius: 100px;
+  background: var(--df-card-bg);
+}

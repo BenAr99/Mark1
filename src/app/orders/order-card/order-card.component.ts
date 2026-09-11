@@ -1,14 +1,56 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { OrderStatusBadgeComponent } from '../order-status-badge/order-status-badge.component';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { StatusPillComponent } from '../../shared/status-pill/status-pill.component';
+import { dueSuffix, daysUntil, shortDate } from '../format';
 import { Order } from '../order.model';
+import { OrdersService } from '../orders.service';
+import { sortTeeth } from '../teeth';
 
+export type OrderCardVariant = 'doctor' | 'technician';
+
+/** Карточка заказа в списке — frames 2:26 (врач) и 7:26 (техник). */
 @Component({
   selector: 'app-order-card',
-  imports: [OrderStatusBadgeComponent],
+  imports: [StatusPillComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './order-card.component.scss',
   templateUrl: './order-card.component.html',
 })
 export class OrderCardComponent {
+  private readonly orders = inject(OrdersService);
+
   order = input.required<Order>();
+  variant = input<OrderCardVariant>('doctor');
+
+  open = output<Order>();
+  accept = output<Order>();
+
+  protected readonly teeth = computed(() => sortTeeth(this.order().teeth).join(', '));
+
+  /** У сданных работ срок уже неинтересен — не подсвечиваем и не считаем дни. */
+  private readonly dueMatters = computed(
+    () => this.order().status !== 'ready' && this.order().status !== 'delivered',
+  );
+
+  protected readonly dueText = computed(() => {
+    const order = this.order();
+    const note = this.dueMatters() ? dueSuffix(order.dueDate) : '';
+
+    return `Срок: ${shortDate(order.dueDate)}${note ? ` ${note}` : ''}`;
+  });
+
+  protected readonly dueUrgent = computed(
+    () => this.dueMatters() && daysUntil(this.order().dueDate) <= 1,
+  );
+
+  protected readonly technician = computed(() => this.orders.person(this.order().technicianId));
+  protected readonly doctor = computed(() => this.orders.person(this.order().doctorId));
+
+  protected readonly canAccept = computed(
+    () => this.variant() === 'technician' && this.order().status === 'sent',
+  );
+
+  protected onAccept(event: Event): void {
+    event.stopPropagation();
+    this.accept.emit(this.order());
+  }
 }

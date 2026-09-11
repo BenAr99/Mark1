@@ -1,0 +1,20 @@
+<app-tg-header title="Заказы" [subtitle]="subtitle()" />
+
+<div class="df-content">
+  <app-segmented [items]="filters()" [(value)]="filter" />
+
+  @for (order of visibleOrders(); track order.id) {
+    <app-order-card
+      [order]="order"
+      variant="technician"
+      (open)="openOrder($event)"
+      (accept)="accept($event)"
+    />
+  } @empty {
+    <p class="empty">В этой вкладке пока пусто.</p>
+  }
+</div>
+
+@if (newCount()) {
+  <app-main-button [text]="'Принять все новые · ' + newCount()" (pressed)="acceptAll()" />
+}

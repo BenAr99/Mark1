@@ -1,0 +1,34 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &[data-status='sent'] {
+    background: var(--df-sent-bg);
+    color: var(--df-sent-fg);
+  }
+
+  &[data-status='accepted'] {
+    background: var(--df-accepted-bg);
+    color: var(--df-accepted-fg);
+  }
+
+  &[data-status='in_progress'] {
+    background: var(--df-progress-bg);
+    color: var(--df-progress-fg);
+  }
+
+  &[data-status='ready'] {
+    background: var(--df-ready-bg);
+    color: var(--df-ready-fg);
+  }
+
+  &[data-status='delivered'] {
+    background: var(--df-delivered-bg);
+    color: var(--df-delivered-fg);
+  }
+}

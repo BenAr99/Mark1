@@ -1,0 +1,13 @@
+@if (!native) {
+  <div class="area">
+    <button
+      type="button"
+      class="button"
+      [attr.data-tone]="tone()"
+      [disabled]="disabled() || loading()"
+      (click)="press()"
+    >
+      {{ loading() ? 'Подождите…' : text() }}
+    </button>
+  </div>
+}

@@ -1,0 +1,177 @@
+<app-tg-header title="Новый заказ" [subtitle]="subtitle()" [showBack]="true" (back)="leave()" />
+
+<div class="df-content df-content--tight">
+  <p class="df-caption">Пациент</p>
+  <div class="df-group">
+    <label class="df-row">
+      <span class="df-row__label">ФИО</span>
+      <input
+        type="text"
+        class="input"
+        placeholder="Иванов Артём П."
+        [value]="draft().patientName"
+        (input)="drafts.patch({ patientName: $any($event.target).value })"
+      />
+    </label>
+  </div>
+
+  <p class="df-caption">Зубы · FDI</p>
+  <div class="df-group">
+    <div class="df-row">
+      <div class="teeth">
+        @for (tooth of teeth(); track tooth) {
+          <span class="df-tooth-chip">{{ tooth }}</span>
+        } @empty {
+          <span class="df-row__value df-row__value--placeholder">Не выбраны</span>
+        }
+      </div>
+
+      <button type="button" class="link" (click)="openTeethPicker()">
+        Выбрать на схеме
+        <span class="df-chevron">›</span>
+      </button>
+    </div>
+  </div>
+
+  <p class="df-caption">Работа</p>
+  <div class="df-group">
+    <label class="df-row">
+      <span class="df-row__label">Вид работы</span>
+      <span class="df-row__value" [class.df-row__value--placeholder]="!draft().workType">
+        {{ draft().workType || 'Выбрать' }}
+        <span class="df-chevron">›</span>
+        <select
+          class="select"
+          [value]="draft().workType"
+          (change)="drafts.patch({ workType: $any($event.target).value })"
+        >
+          <option value="" disabled>Выбрать</option>
+          @for (type of workTypes; track type) {
+            <option [value]="type">{{ type }}</option>
+          }
+        </select>
+      </span>
+    </label>
+
+    <div class="df-divider"></div>
+
+    <div class="df-row df-row--tap" (click)="openDatePicker(dueInput)">
+      <span class="df-row__label">Срок выполнения</span>
+      <span class="df-row__value" [class.df-row__value--placeholder]="!draft().dueDate">
+        {{ draft().dueDate ? dueLabel() : 'Выбрать' }}
+        <span class="df-chevron">›</span>
+        <input
+          #dueInput
+          type="date"
+          class="select"
+          [value]="draft().dueDate"
+          (change)="drafts.patch({ dueDate: $any($event.target).value })"
+        />
+      </span>
+    </div>
+
+    <div class="df-divider"></div>
+
+    <label class="df-row">
+      <span class="df-row__label">Оттенок</span>
+      <span class="df-row__value" [class.df-row__value--placeholder]="!draft().shade">
+        {{ draft().shade || 'Выбрать' }}
+        <span class="df-chevron">›</span>
+        <select
+          class="select"
+          [value]="draft().shade"
+          (change)="drafts.patch({ shade: $any($event.target).value })"
+        >
+          <option value="" disabled>Выбрать</option>
+          @for (shade of shades; track shade) {
+            <option [value]="shade">{{ shade }}</option>
+          }
+        </select>
+      </span>
+    </label>
+  </div>
+
+  <p class="df-caption">Техник</p>
+  <div class="df-group">
+    <button
+      type="button"
+      class="df-row df-row--tall df-row--tap"
+      (click)="pickingTechnician.set(!pickingTechnician())"
+    >
+      @if (technician(); as person) {
+        <span class="person">
+          <img
+            class="person__avatar"
+            src="assets/figma/avatar-tech-36.svg"
+            width="36"
+            height="36"
+            alt=""
+          />
+          <span class="person__text">
+            <span class="person__name">{{ person.name }}</span>
+            <span class="person__meta"> {{ person.org }} · {{ load(person.id) }} в работе </span>
+          </span>
+        </span>
+      } @else {
+        <span class="df-row__value df-row__value--placeholder">Выбрать техника</span>
+      }
+      <span class="df-chevron">›</span>
+    </button>
+
+    @if (pickingTechnician()) {
+      @for (person of technicians; track person.id) {
+        <div class="df-divider"></div>
+        <button
+          type="button"
+          class="df-row df-row--tall df-row--tap"
+          (click)="pickTechnician(person.id)"
+        >
+          <span class="person">
+            <img
+              class="person__avatar"
+              src="assets/figma/avatar-tech-36.svg"
+              width="36"
+              height="36"
+              alt=""
+            />
+            <span class="person__text">
+              <span class="person__name">{{ person.name }}</span>
+              <span class="person__meta">{{ person.org }} · {{ load(person.id) }} в работе</span>
+            </span>
+          </span>
+          @if (draft().technicianId === person.id) {
+            <img src="assets/figma/radio-checked.svg" width="20" height="20" alt="Выбран" />
+          }
+        </button>
+      }
+    }
+  </div>
+
+  <p class="df-caption">Файлы и сканы</p>
+  <div class="df-group">
+    <app-files-strip
+      [files]="draft().files"
+      [editable]="true"
+      (add)="drafts.addFiles($event)"
+      (remove)="drafts.removeFile($event)"
+    />
+  </div>
+
+  <p class="df-caption">Комментарий</p>
+  <div class="df-group">
+    <textarea
+      class="comment"
+      rows="3"
+      placeholder="Например: уступ 0.8 мм, контакт с соседними плотный…"
+      [value]="draft().comment"
+      (input)="drafts.patch({ comment: $any($event.target).value })"
+    ></textarea>
+  </div>
+</div>
+
+<app-main-button
+  text="Отправить заказ технику"
+  [disabled]="!drafts.isComplete()"
+  [loading]="submitting()"
+  (pressed)="submit()"
+/>

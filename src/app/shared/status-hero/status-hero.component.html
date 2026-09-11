@@ -1,0 +1,12 @@
+<section class="hero" [attr.data-status]="status()">
+  <div class="hero__head">
+    @if (dot(); as dotSrc) {
+      <img class="hero__dot" [src]="dotSrc" width="10" height="10" alt="" />
+    } @else {
+      <span class="hero__dot hero__dot--plain"></span>
+    }
+    <p class="hero__label">{{ label() }}</p>
+  </div>
+
+  <p class="hero__text">{{ text() }}</p>
+</section>

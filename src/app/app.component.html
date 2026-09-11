@@ -1,1 +1,23 @@
-<router-outlet />
+@if (showDemoBar()) {
+  <div class="demo">
+    <button type="button" class="demo__label" (click)="openGate()">Демо</button>
+
+    <div class="demo__switch">
+      @for (option of identities; track option.identity.personId) {
+        <button
+          type="button"
+          class="demo__option"
+          [class.demo__option--active]="isCurrent(option.identity)"
+          [title]="option.name"
+          (click)="switchTo(option.identity)"
+        >
+          {{ option.label }} · {{ option.name.split(' ')[0] }}
+        </button>
+      }
+    </div>
+  </div>
+}
+
+<div class="shell">
+  <router-outlet />
+</div>

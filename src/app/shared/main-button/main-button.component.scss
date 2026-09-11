@@ -1,0 +1,41 @@
+:host {
+  display: block;
+  flex-shrink: 0;
+}
+
+.area {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 8px 12px;
+  background: var(--df-card-bg);
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 15px;
+  border: 0;
+  border-radius: var(--df-radius-control);
+  background: var(--df-accent);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &[data-tone='green'] {
+    background: var(--df-green);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:active:not(:disabled) {
+    opacity: 0.85;
+  }
+}

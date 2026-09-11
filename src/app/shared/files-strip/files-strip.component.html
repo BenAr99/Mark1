@@ -1,0 +1,36 @@
+<div class="strip">
+  @for (file of files(); track file.id; let i = $index) {
+    <div class="df-file strip__tile" [attr.data-tone]="tone(file, i)">
+      <span class="df-file__kind">{{ label(file) }}</span>
+      <span class="df-file__name">{{ file.name }}</span>
+
+      @if (editable()) {
+        <button
+          type="button"
+          class="strip__remove"
+          [attr.aria-label]="'Убрать ' + file.name"
+          (click)="remove.emit(file.id)"
+        >
+          ×
+        </button>
+      }
+    </div>
+  } @empty {
+    @if (!editable()) {
+      <p class="strip__empty">Вложений нет</p>
+    }
+  }
+
+  @if (editable()) {
+    <button type="button" class="strip__add" aria-label="Добавить файл" (click)="picker.click()">
+      +
+    </button>
+    <input
+      #picker
+      type="file"
+      multiple
+      hidden
+      (change)="add.emit($any($event.target).files); $any($event.target).value = ''"
+    />
+  }
+</div>

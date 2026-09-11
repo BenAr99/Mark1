@@ -1,12 +1,17 @@
-import {ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners} from '@angular/core';
-import { provideRouter } from '@angular/router';
+import {
+  ApplicationConfig,
+  inject,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
-import {TelegramService} from './telegram.service';
+import { TelegramService } from './core/telegram.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAppInitializer(() => inject(TelegramService).init()),
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes)
-  ]
+    provideRouter(routes, withComponentInputBinding()),
+  ],
 };

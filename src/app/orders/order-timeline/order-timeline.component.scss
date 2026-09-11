@@ -1,0 +1,82 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 14px;
+}
+
+.step {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.step__rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.step__dot {
+  display: block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+
+  &--empty {
+    border: 1.5px solid #d1d1d6;
+    border-radius: 100px;
+    background: var(--df-card-bg);
+  }
+}
+
+.step__link {
+  width: 2px;
+  height: 26px;
+  border-radius: 1px;
+  background: var(--df-segment-bg);
+
+  &--done {
+    background: #bbd9f5;
+  }
+}
+
+.step__text {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.step__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.step__label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--df-text);
+
+  &--pending {
+    font-weight: 500;
+    color: var(--df-muted);
+  }
+}
+
+.step__note {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--df-hint);
+}

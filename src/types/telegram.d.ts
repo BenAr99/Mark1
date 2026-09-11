@@ -10,34 +10,53 @@ declare global {
     photo_url?: string;
   }
 
+  interface TelegramMainButton {
+    setText(text: string): TelegramMainButton;
+    setParams(params: {
+      text?: string;
+      color?: string;
+      text_color?: string;
+      is_active?: boolean;
+      is_visible?: boolean;
+    }): TelegramMainButton;
+    show(): void;
+    hide(): void;
+    enable(): void;
+    disable(): void;
+    showProgress(leaveActive?: boolean): void;
+    hideProgress(): void;
+    onClick(cb: () => void): void;
+    offClick(cb: () => void): void;
+  }
+
   interface TelegramWebApp {
     ready(): void;
     expand(): void;
     close(): void;
     initData: string;
     initDataUnsafe: { user?: TelegramUser; auth_date?: number; hash?: string };
+    /** 'ios' | 'android' | 'tdesktop' | 'weba' | … и 'unknown' вне Telegram. */
+    platform: string;
+    version: string;
     colorScheme: 'light' | 'dark';
     setHeaderColor(color: string): void;
     onEvent(event: string, cb: () => void): void;
     offEvent(event: string, cb: () => void): void;
     showAlert(message: string, cb?: () => void): void;
     showConfirm(message: string, cb: (confirmed: boolean) => void): void;
-    MainButton: {
-      setText(text: string): TelegramWebApp['MainButton'];
-      show(): void;
-      hide(): void;
-      showProgress(leaveActive?: boolean): void;
-      hideProgress(): void;
-      onClick(cb: () => void): void;
-      offClick(cb: () => void): void;
-    };
+    openLink(url: string, options?: { try_instant_view?: boolean }): void;
+    openTelegramLink(url: string): void;
+    MainButton: TelegramMainButton;
     BackButton: {
       show(): void;
       hide(): void;
       onClick(cb: () => void): void;
       offClick(cb: () => void): void;
     };
-    HapticFeedback: { impactOccurred(style: 'light' | 'medium' | 'heavy'): void };
+    HapticFeedback: {
+      impactOccurred(style: 'light' | 'medium' | 'heavy'): void;
+      notificationOccurred(type: 'error' | 'success' | 'warning'): void;
+    };
   }
 
   interface Window {

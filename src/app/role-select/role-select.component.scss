@@ -1,0 +1,79 @@
+:host {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--df-page-bg);
+}
+
+.gate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 28px 16px 24px;
+}
+
+.gate__head {
+  padding: 0 14px 6px;
+}
+
+.gate__title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--df-text);
+}
+
+.gate__subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--df-hint);
+}
+
+.gate__note {
+  margin: 6px 0 0;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  color: var(--df-hint);
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.person__avatar {
+  display: block;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.person__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.person__name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--df-text);
+}
+
+.person__meta {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--df-hint);
+}

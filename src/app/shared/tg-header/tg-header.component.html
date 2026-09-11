@@ -1,0 +1,16 @@
+<header class="header">
+  <div class="header__left">
+    @if (showBack()) {
+      <button type="button" class="header__back" aria-label="Назад" (click)="back.emit()">←</button>
+    }
+
+    <div class="header__titles">
+      <p class="header__title">{{ title() }}</p>
+      @if (subtitle()) {
+        <p class="header__subtitle">{{ subtitle() }}</p>
+      }
+    </div>
+  </div>
+
+  <button type="button" class="header__close" aria-label="Закрыть" (click)="close()">×</button>
+</header>

@@ -1,0 +1,13 @@
+<app-tg-header title="DentalFlow" [subtitle]="clinic()" />
+
+<div class="df-content">
+  <app-segmented [items]="filters" [(value)]="filter" />
+
+  @for (order of visibleOrders(); track order.id) {
+    <app-order-card [order]="order" variant="doctor" (open)="openOrder($event)" />
+  } @empty {
+    <p class="empty">В этой вкладке пока пусто.</p>
+  }
+</div>
+
+<app-main-button text="Новый заказ" (pressed)="createOrder()" />

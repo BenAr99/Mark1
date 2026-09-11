@@ -1,0 +1,29 @@
+<div class="timeline">
+  @for (step of steps(); track step.status) {
+    <div class="step">
+      <div class="step__rail">
+        @if (dot(step); as dotSrc) {
+          <img class="step__dot" [src]="dotSrc" width="16" height="16" alt="" />
+        } @else {
+          <span class="step__dot step__dot--empty"></span>
+        }
+
+        @if (!step.last) {
+          <span class="step__link" [class.step__link--done]="step.linkDone"></span>
+        }
+      </div>
+
+      <div class="step__text">
+        <div class="step__head">
+          <span class="step__label" [class.step__label--pending]="!step.done">{{
+            step.label
+          }}</span>
+          <span class="df-who" [attr.data-role]="step.owner">
+            {{ step.owner === 'doctor' ? 'Врач' : 'Техник' }}
+          </span>
+        </div>
+        <span class="step__note">{{ step.note }}</span>
+      </div>
+    </div>
+  }
+</div>

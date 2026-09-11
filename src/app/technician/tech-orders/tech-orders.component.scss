@@ -1,0 +1,11 @@
+@use '../../shared/screen' as screen;
+
+@include screen.host;
+
+.empty {
+  width: 100%;
+  margin: 24px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--df-hint);
+}

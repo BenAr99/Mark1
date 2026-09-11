@@ -1,59 +1,80 @@
-# Mark1
+# DentalFlow
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.7.
+Telegram Mini App: связка **врач ↔ зубной техник**. Angular 22, standalone-компоненты, signals.
+Вёрстка собрана по макету Figma
+[«DentalFlow — Telegram Mini App»](https://www.figma.com/design/9hWfBU3cA9BYjrzROsYnKI/).
 
-## Development server
-
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Запуск
 
 ```bash
-ng generate component component-name
+npm ci
+npm start          # http://localhost:4205
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Прод-сборка (как в CI): `npx ng build --base-href /Mark1/`.
 
-```bash
-ng generate --help
+## Демо-режим: выбор пользователя
+
+Авторизации и бэкенда пока нет, поэтому при первом запуске открывается экран **«Выберите, под кем
+зайти»** (`/role`). Выбор сохраняется в `localStorage`, а сверху появляется тёмная панель **«Демо»**
+— в ней можно переключиться между врачом и техниками в один тап.
+
+Доступные пользователи заданы в `DEMO_IDENTITIES` (`src/app/core/session.service.ts`):
+
+| Роль   | Пользователь    | Организация               |
+| ------ | --------------- | ------------------------- |
+| Врач   | Иса Кулиев      | Клиника «Дента-М»         |
+| Техник | Рустам Ахметов  | Лаборатория «ОртоЛаб»     |
+| Техник | Азат Гизатуллин | Лаборатория «Дентал Про»  |
+
+Панель и экран выбора — временные леса: когда появится авторизация через `initData`, достаточно
+убрать `role-select`, панель в `app.component.html` и заменить `SessionService.identity` на данные
+из Telegram. Остальной код про роль уже ничего не знает.
+
+## Экраны
+
+| Маршрут               | Экран макета                | Компонент               |
+| --------------------- | --------------------------- | ----------------------- |
+| `/role`               | —                           | `RoleSelectComponent`   |
+| `/doctor`             | 01 · Врач — Мои заказы      | `DoctorOrdersComponent` |
+| `/doctor/new`         | 02 · Врач — Новый заказ     | `NewOrderComponent`     |
+| `/doctor/new/teeth`   | 03 · Выбор зубов (FDI)      | `TeethPickerComponent`  |
+| `/doctor/orders/:id`  | 04 · Врач — Карточка заказа | `DoctorOrderComponent`  |
+| `/tech`               | 06 · Техник — Входящие      | `TechOrdersComponent`   |
+| `/tech/orders/:id`    | 07 · Техник — Заказ         | `TechOrderComponent`    |
+
+Экран 05 «Чат по заказу» намеренно не реализован: переписка ведётся в обычном диалоге Telegram.
+На карточках заказа есть строка «Написать технику» / «Написать врачу» — она открывает личный чат
+через `openTelegramLink`. Уведомления о смене статуса присылает бот, приложение их только считает
+(бейдж непрочитанных сбрасывается при открытии заказа).
+
+## Статусная модель
+
+`Отправлено → Принято → В процессе → Готово → Доставлено` (frame 8:5 макета).
+Врач ставит `Отправлено` и `Доставлено`, техник — три статуса между ними. Цепочка описана в
+`ORDER_FLOW` / `ORDER_STATUS_OWNER` (`src/app/orders/order.model.ts`), переходы — в
+`OrdersService.setStatus()` и `advance()`; назад по цепочке заказ не двигается.
+
+## Структура
+
+```
+src/app/
+  core/         TelegramService, SessionService, roleGuard
+  orders/       модель, мок-сервис, формат дат, схема FDI, карточка и таймлайн заказа
+  shared/       tg-header, segmented, main-button, status-pill, status-hero, files-strip
+  doctor/       экраны врача + черновик нового заказа
+  technician/   экраны техника
+  role-select/  обёртка выбора пользователя
 ```
 
-## Building
+Токены дизайна (цвета статусов, отступы, радиусы) и примитивы iOS-списка (`.df-group`, `.df-row`,
+`.df-caption`, `.df-divider`) лежат в `src/styles.scss`. Иконки, экспортированные из Figma, —
+в `public/assets/figma/`.
 
-To build the project run:
+`MainButtonComponent` внутри Telegram управляет нативной `MainButton`, а в браузере рисует
+кнопку сам — чтобы демо оставалось кликабельным.
 
-```bash
-ng build
-```
+## Данные
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Заказы живут в памяти вкладки (`MOCK_ORDERS` в `src/app/orders/orders.service.ts`) и сбрасываются
+при перезагрузке. Реальные вложения не загружаются — сохраняются только имена файлов.

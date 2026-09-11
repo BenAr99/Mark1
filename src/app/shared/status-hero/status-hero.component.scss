@@ -1,0 +1,107 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--df-radius-card);
+
+  &[data-status='sent'] {
+    background: var(--df-sent-bg);
+
+    .hero__label {
+      color: var(--df-sent-strong);
+    }
+    .hero__text {
+      color: var(--df-sent-body);
+    }
+    .hero__dot--plain {
+      background: var(--df-sent-dot);
+    }
+  }
+
+  &[data-status='accepted'] {
+    background: var(--df-accepted-bg);
+
+    .hero__label {
+      color: var(--df-accepted-strong);
+    }
+    .hero__text {
+      color: var(--df-accepted-body);
+    }
+    .hero__dot--plain {
+      background: var(--df-accepted-dot);
+    }
+  }
+
+  &[data-status='in_progress'] {
+    background: var(--df-progress-bg);
+
+    .hero__label {
+      color: var(--df-progress-strong);
+    }
+    .hero__text {
+      color: var(--df-progress-body);
+    }
+  }
+
+  &[data-status='ready'] {
+    background: var(--df-ready-bg);
+
+    .hero__label {
+      color: var(--df-ready-strong);
+    }
+    .hero__text {
+      color: var(--df-ready-body);
+    }
+  }
+
+  &[data-status='delivered'] {
+    background: var(--df-delivered-bg);
+
+    .hero__label {
+      color: var(--df-delivered-strong);
+    }
+    .hero__text {
+      color: var(--df-delivered-body);
+    }
+    .hero__dot--plain {
+      background: var(--df-delivered-dot);
+    }
+  }
+}
+
+.hero__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero__dot {
+  display: block;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+
+  &--plain {
+    border-radius: 50%;
+  }
+}
+
+.hero__label {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.hero__text {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+}

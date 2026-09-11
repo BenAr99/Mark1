@@ -1,0 +1,10 @@
+/* Каркас экрана мини-аппа: шапка сверху, скроллируемый контент, кнопка снизу. */
+@mixin host {
+  :host {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--df-page-bg);
+  }
+}

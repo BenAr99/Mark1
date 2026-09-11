@@ -1,0 +1,72 @@
+:host {
+  display: block;
+  flex-shrink: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px 12px;
+  background: var(--df-card-bg);
+  border-bottom: 1px solid var(--df-separator);
+}
+
+.header__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.header__back {
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--df-accent);
+  cursor: pointer;
+}
+
+.header__titles {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.header__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--df-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header__subtitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--df-hint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header__close {
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--df-hint);
+  cursor: pointer;
+}

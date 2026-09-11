@@ -1,0 +1,17 @@
+<div class="segmented" role="tablist">
+  @for (item of items(); track item.value) {
+    <button
+      type="button"
+      role="tab"
+      class="segmented__item"
+      [class.segmented__item--active]="value() === item.value"
+      [attr.aria-selected]="value() === item.value"
+      (click)="value.set(item.value)"
+    >
+      {{ item.label }}
+      @if (item.count !== undefined) {
+        · {{ item.count }}
+      }
+    </button>
+  }
+</div>

@@ -1,0 +1,130 @@
+<app-tg-header
+  title="Выбор зубов"
+  subtitle="Нотация FDI · постоянный прикус"
+  [showBack]="true"
+  (back)="done()"
+/>
+
+<div class="df-content">
+  <section class="chart">
+    <div class="chart__labels">
+      <span>Квадрант 1</span>
+      <span>Квадрант 2</span>
+    </div>
+
+    <div class="chart__arch">
+      @for (quadrant of arches[0]; track $index; let last = $last) {
+        <div class="chart__quadrant">
+          @for (tooth of quadrant; track tooth) {
+            <button
+              type="button"
+              class="tooth"
+              [class.tooth--on]="isSelected(tooth)"
+              [attr.aria-pressed]="isSelected(tooth)"
+              (click)="toggle(tooth)"
+            >
+              <img
+                class="tooth__crown"
+                [src]="
+                  isSelected(tooth)
+                    ? 'assets/figma/tooth-crown-active.svg'
+                    : 'assets/figma/tooth-crown-idle.svg'
+                "
+                width="10"
+                height="9"
+                alt=""
+              />
+              <span class="tooth__num">{{ tooth }}</span>
+            </button>
+          }
+        </div>
+        @if (!last) {
+          <div class="chart__midline"></div>
+        }
+      }
+    </div>
+
+    <div class="chart__rule"></div>
+
+    <div class="chart__arch">
+      @for (quadrant of arches[1]; track $index; let last = $last) {
+        <div class="chart__quadrant">
+          @for (tooth of quadrant; track tooth) {
+            <button
+              type="button"
+              class="tooth"
+              [class.tooth--on]="isSelected(tooth)"
+              [attr.aria-pressed]="isSelected(tooth)"
+              (click)="toggle(tooth)"
+            >
+              <img
+                class="tooth__crown"
+                [src]="
+                  isSelected(tooth)
+                    ? 'assets/figma/tooth-crown-active.svg'
+                    : 'assets/figma/tooth-crown-idle.svg'
+                "
+                width="10"
+                height="9"
+                alt=""
+              />
+              <span class="tooth__num">{{ tooth }}</span>
+            </button>
+          }
+        </div>
+        @if (!last) {
+          <div class="chart__midline"></div>
+        }
+      }
+    </div>
+
+    <div class="chart__labels">
+      <span>Квадрант 4</span>
+      <span>Квадрант 3</span>
+    </div>
+  </section>
+
+  <p class="hint">Верхняя челюсть — сверху, нижняя — снизу; стороны показаны со стороны врача.</p>
+
+  <p class="df-caption">Выбрано · {{ selected().length }}</p>
+  <div class="df-group">
+    <div class="chips">
+      @for (tooth of selected(); track tooth) {
+        <button type="button" class="chip" (click)="drafts.removeTooth(tooth)">
+          <span class="chip__num">{{ tooth }}</span>
+          <span class="chip__name">{{ toothName(tooth) }}</span>
+          <span class="chip__x">×</span>
+        </button>
+      } @empty {
+        <span class="df-row__value df-row__value--placeholder">Ничего не выбрано</span>
+      }
+    </div>
+  </div>
+
+  <p class="df-caption">Вид работы для выбранных зубов</p>
+  <div class="df-group">
+    @for (option of workOptions; track option.value; let first = $first) {
+      @if (!first) {
+        <div class="df-divider"></div>
+      }
+      <button
+        type="button"
+        class="df-row df-row--tap"
+        (click)="drafts.patch({ teethWork: option.value })"
+      >
+        <span class="df-row__label">{{ option.label }}</span>
+        @if (draft().teethWork === option.value) {
+          <img src="assets/figma/radio-checked.svg" width="20" height="20" alt="Выбрано" />
+        } @else {
+          <span class="radio"></span>
+        }
+      </button>
+    }
+  </div>
+</div>
+
+<app-main-button
+  [text]="'Готово · выбрано ' + countLabel()"
+  [disabled]="!selected().length"
+  (pressed)="done()"
+/>

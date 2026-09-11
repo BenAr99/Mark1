@@ -1,3 +1,6 @@
+/* DentalFlow — глобальные токены и примитивы из макета Figma
+   (9hWfBU3cA9BYjrzROsYnKI · «DentalFlow — Telegram Mini App»). */
+
 *,
 *::before,
 *::after {
@@ -5,28 +8,301 @@
 }
 
 :root {
-  --tg-theme-bg-color: #ffffff;
-  --tg-theme-text-color: #000000;
-  --tg-theme-hint-color: #999999;
-  --tg-theme-link-color: #2481cc;
-  --tg-theme-button-color: #2481cc;
-  --tg-theme-button-text-color: #ffffff;
-  --tg-theme-secondary-bg-color: #f1f1f1;
+  /* Поверхности */
+  --df-page-bg: #f2f2f7;
+  --df-card-bg: #ffffff;
+  --df-separator: #e5e5ea;
+  --df-divider: #ededf0;
+  --df-card-divider: #efeff2;
+  --df-segment-bg: #e4e4e9;
+
+  /* Текст */
+  --df-text: #000000;
+  --df-text-secondary: #3c3c43;
+  --df-text-tertiary: #6e6e76;
+  --df-hint: #8e8e93;
+  --df-muted: #a0a0a8;
+  --df-chevron: #c2c2c7;
+
+  /* Акценты */
+  --df-accent: #3390ec;
+  --df-accent-ink: #2c7dd1;
+  --df-accent-bg: #eaf2fd;
+  --df-green: #34c759;
+  --df-warn: #d9761a;
+
+  /* Статусы заказа */
+  --df-sent-bg: #e7f1fc;
+  --df-sent-fg: #2c7dd1;
+  --df-sent-strong: #1d5f9f;
+  --df-sent-body: #3a72b0;
+  --df-sent-dot: #3390ec;
+
+  --df-accepted-bg: #edecfc;
+  --df-accepted-fg: #5b57d1;
+  --df-accepted-strong: #3f3aa8;
+  --df-accepted-body: #5b57d1;
+  --df-accepted-dot: #5b57d1;
+
+  --df-progress-bg: #fdf0e0;
+  --df-progress-fg: #c97a11;
+  --df-progress-strong: #8a5410;
+  --df-progress-body: #96682b;
+  --df-progress-dot: #e08a1e;
+
+  --df-ready-bg: #e4f7ea;
+  --df-ready-fg: #1e9e4a;
+  --df-ready-strong: #12703a;
+  --df-ready-body: #2e7a50;
+  --df-ready-dot: #1e9e4a;
+
+  --df-delivered-bg: #ececef;
+  --df-delivered-fg: #6e6e76;
+  --df-delivered-strong: #4a4a52;
+  --df-delivered-body: #6e6e76;
+  --df-delivered-dot: #a0a0a8;
+
+  /* Роли (бейдж «Врач» / «Техник») */
+  --df-role-doctor-bg: #eaf2fd;
+  --df-role-doctor-fg: #2c7dd1;
+  --df-role-tech-bg: #f3effa;
+  --df-role-tech-fg: #6d5bb5;
+
+  /* Геометрия */
+  --df-radius-card: 14px;
+  --df-radius-group: 12px;
+  --df-radius-control: 10px;
+  --df-radius-chip: 9px;
+
+  --df-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
   margin: 0;
-  padding: 16px;
-  background: var(--tg-theme-bg-color);
-  color: var(--tg-theme-text-color);
-  font-family: -apple-system, system-ui, sans-serif;
+  background: var(--df-card-bg);
+  color: var(--df-text);
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    system-ui,
+    sans-serif;
+  font-size: 15px;
+  line-height: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button {
-  background: var(--tg-theme-button-color);
-  color: var(--tg-theme-button-text-color);
+  font: inherit;
+  color: inherit;
+}
+
+/* ---------- Примитивы iOS-списка (Caption / Group / Row / Divider) ---------- */
+
+.df-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--df-page-bg);
+
+  &--tight {
+    gap: 8px;
+  }
+}
+
+.df-caption {
+  margin: 0;
+  padding-left: 14px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.36px;
+  text-transform: uppercase;
+  color: var(--df-hint);
+}
+
+.df-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: var(--df-card-bg);
+  border-radius: var(--df-radius-group);
+  overflow: hidden;
+}
+
+.df-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 14px;
+  background: var(--df-card-bg);
   border: 0;
+  text-align: left;
+
+  &--tap {
+    cursor: pointer;
+  }
+
+  &--tall {
+    padding: 11px 14px;
+  }
+}
+
+.df-row__label {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--df-text);
+  white-space: nowrap;
+
+  &--muted {
+    color: var(--df-hint);
+  }
+}
+
+.df-row__value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--df-text-secondary);
+
+  &--strong {
+    color: var(--df-text);
+  }
+
+  &--placeholder {
+    font-weight: 400;
+    color: var(--df-hint);
+  }
+}
+
+.df-chevron {
+  flex-shrink: 0;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--df-chevron);
+}
+
+.df-divider {
+  width: 100%;
+  padding-left: 14px;
+  background: var(--df-card-bg);
+
+  &::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: var(--df-divider);
+  }
+}
+
+/* ---------- Чипы зубов ---------- */
+
+.df-tooth-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
   border-radius: 8px;
-  padding: 8px 16px;
-  margin-right: 8px;
+  background: var(--df-accent-bg);
+  color: var(--df-accent-ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---------- Бейдж непрочитанных ---------- */
+
+.df-unread {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 7px;
+  border-radius: 100px;
+  background: var(--df-accent);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ---------- Бейдж роли ---------- */
+
+.df-who {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 500;
+
+  &[data-role='doctor'] {
+    background: var(--df-role-doctor-bg);
+    color: var(--df-role-doctor-fg);
+  }
+
+  &[data-role='technician'] {
+    background: var(--df-role-tech-bg);
+    color: var(--df-role-tech-fg);
+  }
+}
+
+/* ---------- Плитка файла ---------- */
+
+.df-file {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+  width: 72px;
+  height: 64px;
+  border-radius: var(--df-radius-control);
+  overflow: hidden;
+  text-align: center;
+
+  &[data-tone='stl'] {
+    background: #d9e3ec;
+    color: #4a6076;
+  }
+
+  &[data-tone='warm'] {
+    background: #e7dfd6;
+    color: #7a6650;
+  }
+
+  &[data-tone='cool'] {
+    background: #dce6da;
+    color: #55705a;
+  }
+}
+
+.df-file__kind {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.df-file__name {
+  max-width: 100%;
+  padding: 0 4px;
+  font-size: 9px;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

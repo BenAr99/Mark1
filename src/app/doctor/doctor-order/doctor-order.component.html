@@ -1,0 +1,89 @@
+@if (order(); as order) {
+  <app-tg-header
+    [title]="'Заказ №' + order.id"
+    [subtitle]="subtitle()"
+    [showBack]="true"
+    (back)="back()"
+  />
+
+  <div class="df-content">
+    <app-status-hero [status]="order.status" [text]="heroText()" />
+
+    <p class="df-caption">Ход работы</p>
+    <div class="df-group">
+      <app-order-timeline [order]="order" />
+    </div>
+
+    <p class="df-caption">Детали заказа</p>
+    <div class="df-group">
+      <div class="df-row">
+        <span class="df-row__label df-row__label--muted">Зубы (FDI)</span>
+        <span class="df-row__value df-row__value--strong">{{ teeth() }}</span>
+      </div>
+      <div class="df-divider"></div>
+
+      <div class="df-row">
+        <span class="df-row__label df-row__label--muted">Вид работы</span>
+        <span class="df-row__value df-row__value--strong">{{ order.workSummary }}</span>
+      </div>
+      <div class="df-divider"></div>
+
+      <div class="df-row">
+        <span class="df-row__label df-row__label--muted">Оттенок</span>
+        <span class="df-row__value df-row__value--strong">{{ order.shade || '—' }}</span>
+      </div>
+      <div class="df-divider"></div>
+
+      <div class="df-row">
+        <span class="df-row__label df-row__label--muted">Срок</span>
+        <span class="df-row__value df-row__value--strong">{{ dueLabel() }}</span>
+      </div>
+    </div>
+
+    @if (order.comment) {
+      <p class="df-caption">Комментарий</p>
+      <div class="df-group">
+        <p class="comment">{{ order.comment }}</p>
+      </div>
+    }
+
+    <p class="df-caption">Файлы · {{ filesLabel() }}</p>
+    <div class="df-group">
+      <app-files-strip [files]="order.files" />
+    </div>
+
+    <div class="df-group">
+      <button type="button" class="df-row df-row--tall df-row--tap" (click)="writeToTechnician()">
+        <span class="person">
+          <img
+            class="person__avatar"
+            src="assets/figma/avatar-chat-34.svg"
+            width="34"
+            height="34"
+            alt=""
+          />
+          <span class="person__text">
+            <span class="person__name">Написать технику</span>
+            <span class="person__meta">
+              {{ technician()?.name }} · &#64;{{ technician()?.telegram }}
+            </span>
+          </span>
+        </span>
+        <span class="df-chevron">›</span>
+      </button>
+    </div>
+
+    <p class="note">
+      Переписка идёт в обычном чате Telegram. О смене статуса бот присылает уведомление сам.
+    </p>
+  </div>
+
+  @if (canConfirm()) {
+    <app-main-button text="Подтвердить получение" tone="green" (pressed)="confirmDelivery()" />
+  }
+} @else {
+  <app-tg-header title="Заказ не найден" [showBack]="true" (back)="back()" />
+  <div class="df-content">
+    <p class="note">Такого заказа нет — возможно, он был создан в другой сессии демо.</p>
+  </div>
+}

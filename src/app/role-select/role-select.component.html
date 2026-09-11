@@ -1,0 +1,50 @@
+<div class="gate">
+  <header class="gate__head">
+    <h1 class="gate__title">DentalFlow</h1>
+    <p class="gate__subtitle">Демо-режим · выберите, под кем зайти</p>
+  </header>
+
+  <p class="df-caption">Пользователи</p>
+  <div class="df-group">
+    @for (option of options(); track option.identity.personId; let first = $first) {
+      @if (!first) {
+        <div class="df-divider"></div>
+      }
+      <button
+        type="button"
+        class="df-row df-row--tall df-row--tap"
+        (click)="signIn(option.identity)"
+      >
+        <span class="person">
+          <img
+            class="person__avatar"
+            src="assets/figma/avatar-tech-36.svg"
+            width="36"
+            height="36"
+            alt=""
+          />
+          <span class="person__text">
+            <span class="person__name">
+              {{ option.name }}
+              <span class="df-who" [attr.data-role]="option.identity.role">
+                {{ option.roleLabel }}
+              </span>
+            </span>
+            <span class="person__meta">{{ option.org }} · {{ option.orders }} заказов</span>
+          </span>
+        </span>
+
+        @if (isCurrent(option.identity)) {
+          <img src="assets/figma/radio-checked.svg" width="20" height="20" alt="Текущий" />
+        } @else {
+          <span class="df-chevron">›</span>
+        }
+      </button>
+    }
+  </div>
+
+  <p class="gate__note">
+    Авторизации и бэкенда пока нет: роль хранится в браузере, данные заказов — в памяти вкладки.
+    Переключиться можно в любой момент через панель «Демо» сверху.
+  </p>
+</div>
