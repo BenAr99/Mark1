@@ -77,3 +77,60 @@
   font-weight: 400;
   color: var(--df-hint);
 }
+
+/* ---------- Временный блок отладки initData ---------- */
+
+.dbg__caption {
+  margin-top: 14px;
+}
+
+.dbg__block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 11px 14px;
+}
+
+.dbg__title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--df-hint);
+}
+
+.dbg__raw,
+.dbg__value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--df-text-secondary);
+  /* initData — одна длинная строка без пробелов, иначе она растянет карточку. */
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.dbg__empty {
+  font-size: 13px;
+  color: var(--df-hint);
+}
+
+.dbg__param {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 6px;
+
+  & + & {
+    border-top: 1px solid var(--df-divider);
+  }
+}
+
+.dbg__key {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--df-text);
+}
+
+.dbg__action {
+  color: var(--df-accent);
+}
