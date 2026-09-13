@@ -26,6 +26,10 @@ jobs:
       - run: npm ci
       - run: npx ng build --base-href /Mark1/
       - run: touch dist/Mark1/browser/.nojekyll
+      # У Pages нет SPA-фолбэка: прямой заход на /Mark1/role ищет такой файл
+      # и не находит. 404.html — копия index.html, поэтому приложение всё же
+      # стартует и роутер разбирает адрес сам.
+      - run: cp dist/Mark1/browser/index.html dist/Mark1/browser/404.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
