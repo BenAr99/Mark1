@@ -134,3 +134,17 @@
 .dbg__action {
   color: var(--df-accent);
 }
+
+.dbg__ok {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--df-green);
+}
+
+.dbg__fail {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--df-warn);
+  overflow-wrap: anywhere;
+}

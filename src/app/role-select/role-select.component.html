@@ -90,6 +90,31 @@
         }
       </button>
     }
+
+    <div class="df-divider"></div>
+    <div class="dbg__block">
+      <span class="dbg__title">POST {{ authUrl }}</span>
+      @switch (authState().status) {
+        @case ('skipped') {
+          <span class="dbg__empty">Не отправляли — initData пуста.</span>
+        }
+        @case ('pending') {
+          <span class="dbg__empty">Отправляем…</span>
+        }
+        @case ('ok') {
+          <span class="dbg__ok">Ответ получен</span>
+          <code class="dbg__value">{{ authResponse() }}</code>
+        }
+        @case ('error') {
+          <span class="dbg__fail">Ошибка: {{ $any(authState()).message }}</span>
+        }
+      }
+    </div>
+
+    <div class="df-divider"></div>
+    <button type="button" class="df-row df-row--tap" (click)="retryAuth()">
+      <span class="df-row__label dbg__action">Отправить initData ещё раз</span>
+    </button>
   </div>
 
   <p class="gate__note">

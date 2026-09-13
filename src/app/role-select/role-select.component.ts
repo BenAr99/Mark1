@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { API_BASE, AuthService } from '../core/auth.service';
 import { DEMO_IDENTITIES, DemoIdentity, SessionService } from '../core/session.service';
 import { TelegramService } from '../core/telegram.service';
 import { OrdersService } from '../orders/orders.service';
@@ -33,6 +34,7 @@ export class RoleSelectComponent {
   private readonly ordersService = inject(OrdersService);
   private readonly session = inject(SessionService);
   private readonly telegram = inject(TelegramService);
+  private readonly auth = inject(AuthService);
 
   protected readonly current = this.session.identity;
 
@@ -85,6 +87,20 @@ export class RoleSelectComponent {
   ].map(([key, value]) => ({ key, value }));
 
   protected readonly copyState = signal<'idle' | 'done' | 'fail'>('idle');
+
+  protected readonly authState = this.auth.state;
+  protected readonly authUrl = `${API_BASE}/auth/telegram`;
+
+  /** Ответ бэкенда пока без схемы — показываем как есть. */
+  protected readonly authResponse = computed(() => {
+    const state = this.authState();
+
+    return state.status === 'ok' ? JSON.stringify(state.response, null, 2) : '';
+  });
+
+  protected retryAuth(): void {
+    void this.auth.signInWithTelegram();
+  }
 
   protected async copyInitData(): Promise<void> {
     if (!this.initData) return;
