@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { TelegramService } from './telegram.service';
 
 /** Туннель ngrok живёт до перезапуска и каждый раз новый — правим адрес только здесь. */
-export const API_BASE = 'https://managing-carried-frostily.ngrok-free.dev/docs'
+export const API_BASE = 'https://managing-carried-frostily.ngrok-free.dev'
 
 export type AuthState =
   /** Вне Telegram отправлять нечего — запрос даже не уходит. */
