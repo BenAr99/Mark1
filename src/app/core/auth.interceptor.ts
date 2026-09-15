@@ -5,7 +5,6 @@ import { API_BASE, describeHttpError, isUnauthorized } from './api';
 import { AuthService } from './auth.service';
 
 const AUTH_URL = `${API_BASE}/auth/telegram`;
-const ADMIN_PREFIX = `${API_BASE}/admin/`;
 
 /** Повторяем запрос после перелогина ровно один раз — иначе на 401 будет цикл. */
 const RETRIED = new HttpContextToken(() => false);
@@ -22,10 +21,7 @@ export const apiAuthInterceptor: HttpInterceptorFn = (req, next) => {
   // Сам логин токеном не подписывается — он его и выдаёт.
   if (req.url === AUTH_URL) return next(withAuth(req, null));
 
-  // Админские ручки — всегда от своего имени: во время подмены активен чужой токен,
-  // и запрос «войти от лица другого» под ним бэкенд справедливо не пропустит.
-  const admin = req.url.startsWith(ADMIN_PREFIX);
-  const token = admin ? auth.ownToken() : auth.accessToken();
+  const token = auth.accessToken();
 
   return next(withAuth(req, token)).pipe(
     catchError((error: unknown) => {
@@ -34,7 +30,7 @@ export const apiAuthInterceptor: HttpInterceptorFn = (req, next) => {
       // Токен протух посреди работы: пробуем перелогиниться и повторить запрос.
       return from(auth.refreshToken()).pipe(
         switchMap(() => {
-          const fresh = admin ? auth.ownToken() : auth.accessToken();
+          const fresh = auth.accessToken();
 
           if (!fresh || fresh === token) {
             auth.markExpired(describeHttpError(error));

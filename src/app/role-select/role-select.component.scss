@@ -1,0 +1,77 @@
+:host {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: var(--df-page-bg);
+}
+
+.gate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 28px 16px 24px;
+}
+
+.gate__head {
+  padding: 0 14px 6px;
+}
+
+.gate__title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--df-text);
+}
+
+.gate__subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--df-hint);
+}
+
+.gate__error {
+  width: 100%;
+  margin: 0;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--df-warn);
+  overflow-wrap: anywhere;
+}
+
+.gate__note {
+  margin: 6px 0 0;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  color: var(--df-hint);
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.option__label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--df-text);
+}
+
+.option__hint {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--df-hint);
+  white-space: normal;
+}

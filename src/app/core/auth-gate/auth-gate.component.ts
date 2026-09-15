@@ -38,9 +38,9 @@ export class AuthGateComponent {
   protected readonly authUrl = `${API_BASE}/auth/telegram`;
 
   constructor() {
-    // Роль приехала — дальше решает roleGuard, здесь задерживать незачем.
+    // Вошли — дальше решают гварды: с ролью в свои заказы, без неё на её выбор.
     effect(() => {
-      if (this.session.role()) void this.router.navigateByUrl(this.session.homeRoute());
+      if (this.session.isAuthorized()) void this.router.navigateByUrl(this.session.homeRoute());
     });
   }
 

@@ -1,33 +1,23 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Service, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { Person, Role, WorkRole } from '../orders/order.model';
+import { Person, Role } from '../orders/order.model';
 import { parsePerson } from '../orders/order.mapper';
 import { API_BASE, describeHttpError, field, isRecord, isUnauthorized } from './api';
 import { TelegramService } from './telegram.service';
 
 const STORAGE_KEY = 'dentalflow.session';
 
-/** Разобранный ответ логина: и `/auth/telegram`, и `/admin/act-as/{id}`. */
+/** Разобранный ответ `POST /auth/telegram`. */
 export interface AuthSession {
   accessToken: string;
-  role: Role;
+  /** `null` — бэкенд ещё не знает, врач это или техник: роль выберет сам пользователь. */
+  role: Role | null;
   /** Бэкенд фильтрует `/orders` сам по токену — id нужен только экранам. */
   userId: string | null;
   /** Профиль приходит не всегда: заголовки экранов переживают его отсутствие. */
   profile: Person | null;
 }
-
-/**
- * Админ смотрит приложение от лица врача или техника, поэтому личностей две:
- * своя (по initData) и подменённая (по токену из `/admin/act-as`).
- */
-interface StoredAuth {
-  own: AuthSession | null;
-  acting: { userId: string; session: AuthSession } | null;
-}
-
-const EMPTY: StoredAuth = { own: null, acting: null };
 
 export type AuthState =
   /** Вне Telegram отправлять нечего — запрос даже не уходит. */
@@ -47,28 +37,16 @@ export class AuthService {
   private readonly telegram = inject(TelegramService);
 
   /** Сессия переживает перезагрузку: мини-апп открывается сразу на своих данных. */
-  private readonly _auth = signal<StoredAuth>(restore());
+  private readonly _session = signal<AuthSession | null>(restore());
+  readonly session = this._session.asReadonly();
 
-  /** Личность, от лица которой работает приложение. */
-  private readonly active = computed(() => {
-    const auth = this._auth();
-
-    return auth.acting?.session ?? auth.own;
-  });
-
-  readonly accessToken = computed(() => this.active()?.accessToken ?? null);
-  readonly role = computed<Role | null>(() => this.active()?.role ?? null);
-  readonly userId = computed(() => this.active()?.userId ?? null);
-  readonly profile = computed(() => this.active()?.profile ?? null);
-
-  /** Собственный токен: им подписываются админские ручки даже во время подмены. */
-  readonly ownToken = computed(() => this._auth().own?.accessToken ?? null);
-  readonly isAdmin = computed(() => this._auth().own?.role === 'admin');
-  readonly actingAs = computed(() => this._auth().acting?.session.profile ?? null);
-  readonly isActing = computed(() => !!this._auth().acting);
+  readonly accessToken = computed(() => this._session()?.accessToken ?? null);
+  readonly role = computed<Role | null>(() => this._session()?.role ?? null);
+  readonly userId = computed(() => this._session()?.userId ?? null);
+  readonly profile = computed(() => this._session()?.profile ?? null);
 
   private readonly _state = signal<AuthState>(
-    this._auth().own ? { status: 'ok' } : { status: 'skipped' },
+    this._session() ? { status: 'ok' } : { status: 'skipped' },
   );
   readonly state = this._state.asReadonly();
 
@@ -93,47 +71,35 @@ export class AuthService {
     }));
   }
 
-  /** Админ входит от лица выбранного человека. */
-  async actAs(userId: string): Promise<void> {
-    const session = parseSession(
-      await firstValueFrom(this.http.post<unknown>(`${API_BASE}/admin/act-as/${userId}`, {})),
-      `POST /admin/act-as/${userId}`,
-    );
-
-    this.store({ own: this._auth().own, acting: { userId, session } });
-  }
-
-  /** Возврат к собственной админской личности. */
-  stopActing(): void {
-    this.store({ own: this._auth().own, acting: null });
-  }
-
   /**
-   * Перелогин ради свежих токенов. Подмену переоформляем следом: токен под
-   * чужую личность выдан поверх админского и протухает вместе с ним.
-   *
-   * Личность при этом не меняется ни на миг — иначе кеш заказов счёл бы её
-   * чужой и выбросил ответ запроса, ради которого мы и обновляли токен.
+   * Пользователь без роли выбирает её сам — дальше она закрепляется за аккаунтом.
+   * Если ответ принёс новый токен, берём его: прежний выдавался ещё без роли.
+   * Иначе перелогиниваемся, чтобы не гадать, помнит ли токен роль.
    */
-  async refreshToken(): Promise<void> {
-    const acting = this._auth().acting?.userId ?? null;
+  async setRole(role: Role): Promise<void> {
+    const response = await firstValueFrom(this.http.post<unknown>(`${API_BASE}/me/role`, { role }));
 
-    await this.signInWithTelegram();
+    const session = tryParseSession(response, 'POST /me/role');
 
-    if (!acting || !this._auth().own) return;
+    session ? this.store(session) : await this.forceSignIn();
+  }
 
-    try {
-      await this.actAs(acting);
-    } catch {
-      // Подмена не переоформилась — возвращаемся в режим админа: дальше решит `/role`.
-      this.stopActing();
-    }
+  /** Перелогин ради свежего токена. */
+  refreshToken(): Promise<void> {
+    return this.signInWithTelegram();
   }
 
   /** Токен протух посреди работы — просим переоткрыть мини-апп. */
   markExpired(detail: string): void {
-    this.store(EMPTY);
+    this.store(null);
     this._state.set({ status: 'expired', detail });
+  }
+
+  /** Логин в обход дедупликации: нужен, когда сессия заведомо устарела. */
+  private forceSignIn(): Promise<void> {
+    this.inFlight = null;
+
+    return this.signInWithTelegram();
   }
 
   private async run(): Promise<void> {
@@ -149,9 +115,7 @@ export class AuthService {
 
     for (let attempt = 0; ; attempt++) {
       try {
-        const own = parseSession(await this.post(initData), 'POST /auth/telegram');
-
-        this.store({ own, acting: this._auth().acting });
+        this.store(parseSession(await this.post(initData), 'POST /auth/telegram'));
         this._state.set({ status: 'ok' });
 
         return;
@@ -181,15 +145,12 @@ export class AuthService {
     return firstValueFrom(this.http.post<unknown>(`${API_BASE}/auth/telegram`, { initData }));
   }
 
-  private store(auth: StoredAuth): void {
-    // Подмена — привилегия админа: со сменой роли она теряет смысл.
-    const next: StoredAuth = auth.own?.role === 'admin' ? auth : { own: auth.own, acting: null };
-
-    this._auth.set(next);
+  private store(session: AuthSession | null): void {
+    this._session.set(session);
 
     try {
-      next.own
-        ? localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      session
+        ? localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
         : localStorage.removeItem(STORAGE_KEY);
     } catch {
       // Приватный режим — сессия просто не переживёт перезагрузку.
@@ -209,42 +170,43 @@ function parseSession(raw: unknown, where: string): AuthSession {
   const user = isRecord(field(raw, 'user'))
     ? (field(raw, 'user') as Record<string, unknown>)
     : null;
-  const role = field(raw, 'role') ?? (user ? field(user, 'role') : undefined);
+  const rawRole = field(raw, 'role') ?? (user ? field(user, 'role') : undefined);
+  const rawId = field(raw, 'userId') ?? (user ? field(user, 'id') : undefined);
 
-  if (role !== 'doctor' && role !== 'technician' && role !== 'admin') {
-    throw new Error(`${where}: неизвестная роль «${String(role)}»`);
+  // Пустая роль — не ошибка: так выглядит аккаунт, который её ещё не выбрал.
+  if (rawRole !== undefined && rawRole !== null && !isRole(rawRole)) {
+    throw new Error(`${where}: неизвестная роль «${String(rawRole)}»`);
   }
 
-  const rawId = field(raw, 'userId') ?? (user ? field(user, 'id') : undefined);
-  const workRole: WorkRole | null = role === 'admin' ? null : role;
+  const role = isRole(rawRole) ? rawRole : null;
 
   return {
     accessToken,
     role,
     userId: typeof rawId === 'string' || typeof rawId === 'number' ? String(rawId) : null,
-    // У админа профиля врача или техника нет — карточку участника не собираем.
-    profile: user && workRole ? parsePerson(user, workRole, `${where} · user`) : null,
+    profile: user && role ? parsePerson(user, role, `${where} · user`) : null,
   };
 }
 
-function restore(): StoredAuth {
+/** Тот же разбор для ответа, который сессией может и не быть. */
+function tryParseSession(raw: unknown, where: string): AuthSession | null {
+  try {
+    return parseSession(raw, where);
+  } catch {
+    return null;
+  }
+}
+
+function isRole(value: unknown): value is Role {
+  return value === 'doctor' || value === 'technician';
+}
+
+function restore(): AuthSession | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return EMPTY;
 
-    const parsed = JSON.parse(raw) as StoredAuth;
-    const own = parsed.own ? parseSession(parsed.own, 'сохранённая сессия') : null;
-
-    if (own?.role !== 'admin' || !parsed.acting) return { own, acting: null };
-
-    return {
-      own,
-      acting: {
-        userId: String(parsed.acting.userId),
-        session: parseSession(parsed.acting.session, 'сохранённая подмена'),
-      },
-    };
+    return raw ? parseSession(JSON.parse(raw), 'сохранённая сессия') : null;
   } catch {
-    return EMPTY;
+    return null;
   }
 }

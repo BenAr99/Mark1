@@ -7,14 +7,6 @@
   </div>
 }
 
-@if (showActingBar()) {
-  <div class="acting">
-    <button type="button" class="acting__label" (click)="openPicker()">Админ</button>
-    <span class="acting__text">смотрю как {{ actingName() }}</span>
-    <button type="button" class="acting__exit" (click)="stopActing()">Выйти</button>
-  </div>
-}
-
 <div class="shell">
   <router-outlet />
 </div>

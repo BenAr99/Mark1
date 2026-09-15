@@ -1,0 +1,43 @@
+<div class="gate">
+  <header class="gate__head">
+    <h1 class="gate__title">DentalFlow</h1>
+    <p class="gate__subtitle">Кем вы работаете?</p>
+  </header>
+
+  <p class="df-caption">Роль</p>
+  <div class="df-group">
+    @for (option of options; track option.role; let first = $first) {
+      @if (!first) {
+        <div class="df-divider"></div>
+      }
+      <button
+        type="button"
+        class="df-row df-row--tall df-row--tap"
+        [disabled]="!!saving()"
+        (click)="choose(option)"
+      >
+        <span class="option">
+          <span class="option__label">{{ option.label }}</span>
+          <span class="option__hint">{{ option.hint }}</span>
+        </span>
+
+        @if (saving() === option.role) {
+          <span class="df-row__value df-row__value--placeholder">Сохраняем…</span>
+        } @else {
+          <span class="df-chevron">›</span>
+        }
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="df-group">
+      <p class="gate__error">Не удалось сохранить роль: {{ error() }}</p>
+    </div>
+  }
+
+  <p class="gate__note">
+    Роль закрепляется за аккаунтом на сервере и определяет, какие экраны вы увидите. Сменить её
+    самостоятельно потом нельзя — обратитесь к администратору.
+  </p>
+</div>

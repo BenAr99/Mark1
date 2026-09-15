@@ -1,13 +1,12 @@
 import { computed, inject, Service } from '@angular/core';
+import { Role } from '../orders/order.model';
 import { AuthService } from './auth.service';
 import { TelegramService } from './telegram.service';
 
 /**
- * Кто сейчас в мини-аппе. Всё берётся из ответа `POST /auth/telegram`:
- * роль решает бэкенд по связке Telegram-аккаунта с пользователем.
- *
- * У админа своих заказов нет — он выбирает человека на `/role` и дальше
- * работает от его лица, поэтому `role()` во время подмены равна его роли.
+ * Кто сейчас в мини-аппе. Всё берётся из ответа `POST /auth/telegram`.
+ * Роль у нового аккаунта пустая: он выбирает её сам на `/role`, после чего
+ * `POST /me/role` закрепляет выбор за аккаунтом на бэкенде.
  */
 @Service()
 export class SessionService {
@@ -18,9 +17,8 @@ export class SessionService {
   readonly userId = this.auth.userId;
   readonly isAuthorized = computed(() => this.auth.accessToken() !== null);
 
-  readonly isAdmin = this.auth.isAdmin;
-  readonly isActing = this.auth.isActing;
-  readonly actingAs = this.auth.actingAs;
+  /** Вошли, но роли ещё нет — единственный, кому нужен экран выбора. */
+  readonly needsRole = computed(() => this.isAuthorized() && this.role() === null);
 
   /** Профиль из ответа логина — бэкенд шлёт его не обязательно. */
   readonly person = this.auth.profile;
@@ -38,7 +36,7 @@ export class SessionService {
   readonly org = computed(() => this.person()?.org ?? '');
   readonly orgShort = computed(() => this.person()?.orgShort ?? '');
 
-  /** Админ без подмены попадает на выбор, остальные — сразу в свои заказы. */
+  /** Куда идти после логина: без роли — на её выбор. */
   readonly homeRoute = computed(() => {
     switch (this.role()) {
       case 'technician':
@@ -50,11 +48,7 @@ export class SessionService {
     }
   });
 
-  actAs(userId: string): Promise<void> {
-    return this.auth.actAs(userId);
-  }
-
-  stopActing(): void {
-    this.auth.stopActing();
+  setRole(role: Role): Promise<void> {
+    return this.auth.setRole(role);
   }
 }

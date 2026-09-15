@@ -1,8 +1,5 @@
-/** Роли, от лица которых работают экраны заказов. */
-export type WorkRole = 'doctor' | 'technician';
-
-/** Админ своих заказов не имеет — он смотрит приложение от лица врача или техника. */
-export type Role = WorkRole | 'admin';
+/** Роль пользователя. Пока бэкенд её не назначил, в сессии лежит `null`. */
+export type Role = 'doctor' | 'technician';
 
 /** Статусная модель заказа из макета (frame 8:5). */
 export type OrderStatus = 'sent' | 'accepted' | 'in_progress' | 'ready' | 'delivered';
@@ -24,7 +21,7 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
 };
 
 /** Кто выставляет статус — определяет, чьи кнопки активны. */
-export const ORDER_STATUS_OWNER: Record<OrderStatus, WorkRole> = {
+export const ORDER_STATUS_OWNER: Record<OrderStatus, Role> = {
   sent: 'doctor',
   accepted: 'technician',
   in_progress: 'technician',
@@ -42,7 +39,7 @@ export const ORDER_STATUS_HINT: Record<OrderStatus, string> = {
 
 export interface Person {
   id: string;
-  role: WorkRole;
+  role: Role;
   /** Полное имя: «Рустам Ахметов». */
   name: string;
   /** Короткое имя для карточек: «Р. Ахметов». */

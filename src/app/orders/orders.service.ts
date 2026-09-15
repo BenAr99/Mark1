@@ -1,15 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import { computed, effect, inject, Service, signal, untracked } from '@angular/core';
+import { inject, Service, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { API_BASE, describeHttpError } from '../core/api';
-import { AuthService } from '../core/auth.service';
 import { parseOrder, parseOrderList, parsePeople, PersonOption } from './order.mapper';
 import {
   FileKind,
   Order,
   OrderStatus,
   ORDER_STATUS_LABEL,
-  WorkRole,
   nextStatus,
   statusIndex,
 } from './order.model';
@@ -60,41 +58,10 @@ export class OrdersService {
   private readonly _technicians = signal<readonly PersonOption[]>([]);
   readonly technicians = this._technicians.asReadonly();
 
-  private readonly _doctors = signal<readonly PersonOption[]>([]);
-  readonly doctors = this._doctors.asReadonly();
-
-  private readonly _peopleError = signal('');
-  readonly peopleError = this._peopleError.asReadonly();
+  private readonly _techniciansError = signal('');
+  readonly techniciansError = this._techniciansError.asReadonly();
 
   private inFlight: Promise<void> | null = null;
-
-  /** Ответы предыдущей личности не должны долетать до следующей. */
-  private generation = 0;
-
-  private readonly auth = inject(AuthService);
-
-  /** Кем мы сейчас работаем: у админа это меняется без перезагрузки. */
-  private readonly identity = computed(() => `${this.auth.role()}:${this.auth.userId()}`);
-
-  constructor() {
-    // Сменилась личность (вход, подмена админа, возврат) — чужие заказы больше не наши.
-    effect(() => {
-      this.identity();
-      untracked(() => this.reset());
-    });
-  }
-
-  /** Чистит кеш: всё, что было загружено, принадлежало прошлой личности. */
-  reset(): void {
-    this.generation++;
-    this.inFlight = null;
-    this._orders.set([]);
-    this._technicians.set([]);
-    this._doctors.set([]);
-    this._peopleError.set('');
-    this._error.set('');
-    this._state.set('idle');
-  }
 
   /** Список заказов. Параллельные вызовы (два экрана сразу) ждут один запрос. */
   loadOrders(): Promise<void> {
@@ -104,20 +71,13 @@ export class OrdersService {
   }
 
   private async fetchOrders(): Promise<void> {
-    const generation = this.generation;
-
     this._state.set('loading');
 
     try {
-      const orders = parseOrderList(await this.get('/orders'));
-      if (generation !== this.generation) return;
-
-      this._orders.set(orders);
+      this._orders.set(parseOrderList(await this.get('/orders')));
       this._error.set('');
       this._state.set('ready');
     } catch (error) {
-      if (generation !== this.generation) return;
-
       this._error.set(describeHttpError(error));
       this._state.set('error');
     }
@@ -128,50 +88,27 @@ export class OrdersService {
    * поэтому заказ всегда дотягиваем отдельным запросом и кладём в тот же кеш.
    */
   async loadOrder(id: string): Promise<void> {
-    const generation = this.generation;
-
     if (this._state() === 'idle') this._state.set('loading');
 
     try {
-      const order = parseOrder(await this.get(`/orders/${id}`), `GET /orders/${id}`);
-      if (generation !== this.generation) return;
-
-      this.upsert(order);
+      this.upsert(parseOrder(await this.get(`/orders/${id}`), `GET /orders/${id}`));
       this._error.set('');
       this._state.set('ready');
     } catch (error) {
-      if (generation !== this.generation) return;
-
       this._error.set(describeHttpError(error));
       this._state.set('error');
     }
   }
 
-  loadTechnicians(): Promise<void> {
-    return this.loadPeople('technician');
-  }
-
-  loadDoctors(): Promise<void> {
-    return this.loadPeople('doctor');
-  }
-
-  /** `GET /technicians` и `GET /doctors` устроены одинаково. */
-  private async loadPeople(role: WorkRole): Promise<void> {
-    const generation = this.generation;
-    const path = role === 'doctor' ? '/doctors' : '/technicians';
-    const target = role === 'doctor' ? this._doctors : this._technicians;
-
+  async loadTechnicians(): Promise<void> {
     try {
-      const people = parsePeople(await this.get(path), role, `GET ${path}`);
-      if (generation !== this.generation) return;
-
-      target.set(people);
-      this._peopleError.set('');
+      this._technicians.set(
+        parsePeople(await this.get('/technicians'), 'technician', 'GET /technicians'),
+      );
+      this._techniciansError.set('');
     } catch (error) {
-      if (generation !== this.generation) return;
-
-      // Без списка людей ни заказ не отправить, ни подмену не выбрать.
-      this._peopleError.set(describeHttpError(error));
+      // Без списка исполнителей заказ не отправить — причину показываем в форме.
+      this._techniciansError.set(describeHttpError(error));
     }
   }
 

@@ -7,10 +7,10 @@ import {
   ORDER_FLOW,
   OrderStatus,
   Person,
-  WorkRole,
+  Role,
 } from './order.model';
 
-/** Участник из `GET /technicians` или `GET /doctors`: профиль плюс текущая загрузка. */
+/** Участник справочника: профиль плюс текущая загрузка. */
 export interface PersonOption extends Person {
   /** Сколько заказов у человека сейчас в работе. */
   load: number;
@@ -22,8 +22,8 @@ export function parseOrderList(raw: unknown): Order[] {
   );
 }
 
-/** `GET /technicians` и `GET /doctors` устроены одинаково — различает их только роль. */
-export function parsePeople(raw: unknown, role: WorkRole, path: string): PersonOption[] {
+/** Справочники людей устроены одинаково — различает их только роль. */
+export function parsePeople(raw: unknown, role: Role, path: string): PersonOption[] {
   return asArray(raw, path).map((item, index) => {
     const where = `${path}[${index}]`;
     const record = asRecord(item, where);
@@ -64,7 +64,7 @@ export function parseOrder(raw: unknown, where = 'заказ'): Order {
  * Короткие подписи бэкенд слать не обязан — это чистое оформление,
  * и восстановить их из полного имени дешевле, чем держать в контракте.
  */
-export function parsePerson(raw: unknown, role: WorkRole, where: string): Person {
+export function parsePerson(raw: unknown, role: Role, where: string): Person {
   const person = asRecord(raw, where);
   const name = requireString(person, 'name', where);
   const org = stringField(person, 'org');
@@ -91,7 +91,7 @@ export function shortenName(full: string): string {
 }
 
 /** «Рустам Ахметов» → «Р. Ахметов»; у врача вместо инициала — «д-р». */
-function shortPersonName(full: string, role: WorkRole): string {
+function shortPersonName(full: string, role: Role): string {
   const parts = full.split(/\s+/).filter(Boolean);
   const surname = parts.length > 1 ? parts[parts.length - 1] : parts[0];
   if (!surname) return full;

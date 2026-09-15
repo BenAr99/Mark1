@@ -1,30 +1,29 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { WorkRole } from '../orders/order.model';
+import { Role } from '../orders/order.model';
 import { SessionService } from './session.service';
 
 /**
  * Пускает на ветку маршрутов только ту роль, которую выдал бэкенд.
- * Админ проходит, когда вошёл от лица врача или техника, — иначе его
- * отправляет на выбор человека.
+ * Аккаунт без роли уходит выбирать её, неавторизованный — на экран логина.
  */
-export function roleGuard(role: WorkRole): CanActivateFn {
+export function roleGuard(role: Role): CanActivateFn {
   return () => {
     const session = inject(SessionService);
     const router = inject(Router);
 
     if (session.role() === role) return true;
 
-    return router.parseUrl(session.role() ? session.homeRoute() : '/auth');
+    return router.parseUrl(session.isAuthorized() ? session.homeRoute() : '/auth');
   };
 }
 
-/** Выбор человека — только для админа. */
-export const adminGuard: CanActivateFn = () => {
+/** Выбор роли нужен один раз: с готовой ролью на этом экране делать нечего. */
+export const noRoleGuard: CanActivateFn = () => {
   const session = inject(SessionService);
   const router = inject(Router);
 
-  if (session.isAdmin()) return true;
+  if (session.needsRole()) return true;
 
-  return router.parseUrl(session.role() ? session.homeRoute() : '/auth');
+  return router.parseUrl(session.isAuthorized() ? session.homeRoute() : '/auth');
 };
