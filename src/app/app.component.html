@@ -7,6 +7,15 @@
   </div>
 }
 
+@if (hasRole()) {
+  <div class="role-bar">
+    <span class="role-bar__text">Роль: {{ roleLabel() }}</span>
+    <button type="button" class="role-bar__reset" [disabled]="resetting()" (click)="resetRole()">
+      {{ resetting() ? 'Сбрасываем…' : 'Сбросить роль' }}
+    </button>
+  </div>
+}
+
 <div class="shell">
   <router-outlet />
 </div>

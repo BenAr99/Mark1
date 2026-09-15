@@ -51,4 +51,9 @@ export class SessionService {
   setRole(role: Role): Promise<void> {
     return this.auth.setRole(role);
   }
+
+  /** Снять роль: аккаунт снова окажется на экране выбора. */
+  resetRole(): Promise<void> {
+    return this.auth.setRole(null);
+  }
 }

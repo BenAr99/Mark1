@@ -51,6 +51,7 @@ declare global {
     viewportStableHeight: number;
     isExpanded: boolean;
     /** Bot API 8.0 и новее — в старых клиентах свойств и метода просто нет. */
+    isFullscreen?: boolean;
     safeAreaInset?: TelegramSafeAreaInset;
     contentSafeAreaInset?: TelegramSafeAreaInset;
     /** Bot API 7.7: отключает жест «свернуть», чтобы работала прокрутка. */

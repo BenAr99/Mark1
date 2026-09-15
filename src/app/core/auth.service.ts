@@ -72,11 +72,11 @@ export class AuthService {
   }
 
   /**
-   * Пользователь без роли выбирает её сам — дальше она закрепляется за аккаунтом.
-   * Если ответ принёс новый токен, берём его: прежний выдавался ещё без роли.
+   * Закрепляет роль за аккаунтом; `null` снимает её и возвращает на экран выбора.
+   * Если ответ принёс новый токен, берём его: прежний выдавался под старую роль.
    * Иначе перелогиниваемся, чтобы не гадать, помнит ли токен роль.
    */
-  async setRole(role: Role): Promise<void> {
+  async setRole(role: Role | null): Promise<void> {
     const response = await firstValueFrom(this.http.post<unknown>(`${API_BASE}/me/role`, { role }));
 
     const session = tryParseSession(response, 'POST /me/role');

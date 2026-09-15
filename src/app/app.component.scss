@@ -1,9 +1,10 @@
 :host {
   display: flex;
   flex-direction: column;
-  /* В Telegram высоту диктует сам клиент (см. TelegramService.syncViewport):
-     100dvh там больше видимой области, из-за чего низ экрана недостижим. */
-  height: var(--tg-app-height, 100dvh);
+  /* Высоту берём меньшую из двух: Telegram знает свой webview лучше, чем 100dvh
+     на Android, но и его число бывает завышенным (анимация разворота, клавиатура).
+     Ошибка в любую сторону делает низ экрана недостижимым, `min` страхует от обеих. */
+  height: min(var(--tg-app-height, 100dvh), 100dvh);
   padding-top: var(--tg-inset-top, env(safe-area-inset-top, 0px));
   padding-bottom: var(--tg-inset-bottom, env(safe-area-inset-bottom, 0px));
   background: var(--df-card-bg);
@@ -38,6 +39,40 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+}
+
+/* Полоса роли: тонкая, чтобы не отъедать высоту у экранов на телефоне. */
+.role-bar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 14px;
+  background: var(--df-card-bg);
+  border-bottom: 1px solid var(--df-separator);
+}
+
+.role-bar__text {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--df-hint);
+}
+
+.role-bar__reset {
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--df-accent);
+  cursor: pointer;
+
+  &:disabled {
+    color: var(--df-muted);
+    cursor: default;
+  }
 }
 
 .shell {

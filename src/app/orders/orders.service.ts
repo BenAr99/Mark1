@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Service, signal } from '@angular/core';
+import { effect, inject, Service, signal, untracked } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { API_BASE, describeHttpError } from '../core/api';
+import { AuthService } from '../core/auth.service';
 import { parseOrder, parseOrderList, parsePeople, PersonOption } from './order.mapper';
 import {
   FileKind,
@@ -62,6 +63,26 @@ export class OrdersService {
   readonly techniciansError = this._techniciansError.asReadonly();
 
   private inFlight: Promise<void> | null = null;
+
+  private readonly auth = inject(AuthService);
+
+  constructor() {
+    // Роль сменилась (выбрали или сбросили) — загруженное к новой не относится.
+    effect(() => {
+      this.auth.role();
+      untracked(() => this.reset());
+    });
+  }
+
+  /** Чистит кеш: всё, что было загружено, относилось к прошлой роли. */
+  reset(): void {
+    this.inFlight = null;
+    this._orders.set([]);
+    this._technicians.set([]);
+    this._techniciansError.set('');
+    this._error.set('');
+    this._state.set('idle');
+  }
 
   /** Список заказов. Параллельные вызовы (два экрана сразу) ждут один запрос. */
   loadOrders(): Promise<void> {

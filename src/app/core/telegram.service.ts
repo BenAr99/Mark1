@@ -23,6 +23,8 @@ export class TelegramService {
   }
 
   init(): void {
+    this.keepFocusVisible();
+
     if (!this.tg) return;
     this.tg.ready();
     this.tg.expand();
@@ -40,6 +42,22 @@ export class TelegramService {
     this.tg.onEvent('viewportChanged', () => this.syncViewport());
     this.tg.onEvent('safeAreaChanged', () => this.syncViewport());
     this.tg.onEvent('contentSafeAreaChanged', () => this.syncViewport());
+    this.tg.onEvent('fullscreenChanged', () => this.syncViewport());
+  }
+
+  /**
+   * Клавиатура перекрывает поле ввода: высота мини-аппа при её появлении не
+   * меняется (`viewportStableHeight` на то и stable), поэтому браузеру нечего
+   * прокручивать — подводим сфокусированное поле к центру сами.
+   */
+  private keepFocusVisible(): void {
+    document.addEventListener('focusin', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.matches('input, textarea')) return;
+
+      // Ждём анимацию клавиатуры: до неё прокручивать некуда.
+      setTimeout(() => target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300);
+    });
   }
 
   /** 'activated' — мини-апп снова на переднем плане (Bot API 8.0). */
@@ -60,11 +78,19 @@ export class TelegramService {
 
     if (height) root.setProperty('--tg-app-height', `${height}px`);
 
+    // Отступы под системные элементы нужны только в полноэкранном режиме. В обычном
+    // Telegram сам ставит webview ниже своей шапки, но `safeAreaInset` всё равно
+    // сообщает вырез устройства — прибавив его, мы бы украли высоту у нижнего края
+    // и последний экран стал бы недоступен.
+    const fullscreen = this.tg.isFullscreen === true;
     const safe = this.tg.safeAreaInset;
     const content = this.tg.contentSafeAreaInset;
 
-    root.setProperty('--tg-inset-top', `${(safe?.top ?? 0) + (content?.top ?? 0)}px`);
-    root.setProperty('--tg-inset-bottom', `${(safe?.bottom ?? 0) + (content?.bottom ?? 0)}px`);
+    const top = fullscreen ? (content?.top ?? safe?.top ?? 0) : 0;
+    const bottom = fullscreen ? (content?.bottom ?? safe?.bottom ?? 0) : 0;
+
+    root.setProperty('--tg-inset-top', `${top}px`);
+    root.setProperty('--tg-inset-bottom', `${bottom}px`);
   }
 
   haptic(style: 'light' | 'medium' | 'heavy' = 'light'): void {

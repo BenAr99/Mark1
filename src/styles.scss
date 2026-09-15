@@ -120,6 +120,9 @@ button {
   gap: 10px;
   padding: 14px 16px;
   background: var(--df-page-bg);
+  /* Длинное имя или тип работы не должны уводить экран вбок: по горизонтали
+     не прокручиваемся никогда, свои полосы есть у ленты файлов и таблиц. */
+  overflow-x: hidden;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 
@@ -169,10 +172,13 @@ button {
 }
 
 .df-row__label {
+  min-width: 0;
   font-size: 15px;
   font-weight: 400;
   color: var(--df-text);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &--muted {
     color: var(--df-hint);
@@ -184,9 +190,12 @@ button {
   align-items: center;
   gap: 6px;
   min-width: 0;
+  overflow: hidden;
   font-size: 15px;
   font-weight: 500;
   color: var(--df-text-secondary);
+  text-align: right;
+  overflow-wrap: anywhere;
 
   &--strong {
     color: var(--df-text);
