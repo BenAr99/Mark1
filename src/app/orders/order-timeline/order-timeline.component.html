@@ -22,7 +22,9 @@
             {{ step.owner === 'doctor' ? 'Врач' : 'Техник' }}
           </span>
         </div>
-        <span class="step__note">{{ step.note }}</span>
+        @if (step.note) {
+          <span class="step__note">{{ step.note }}</span>
+        }
       </div>
     </div>
   }

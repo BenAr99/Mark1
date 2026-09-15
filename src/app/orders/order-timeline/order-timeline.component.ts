@@ -14,7 +14,7 @@ interface TimelineStep {
   status: OrderStatus;
   label: string;
   owner: Role;
-  /** Время события либо подсказка, чего ждём. */
+  /** Время события; у ещё не наступивших шагов пусто. */
   note: string;
   done: boolean;
   current: boolean;
@@ -45,7 +45,7 @@ export class OrderTimelineComponent {
         status,
         label: ORDER_STATUS_LABEL[status],
         owner: ORDER_STATUS_OWNER[status],
-        note: event ? dateTime(event.at) : pendingNote(status),
+        note: event ? dateTime(event.at) : '',
         done,
         current: index === reached,
         linkDone: index < reached,
@@ -63,6 +63,3 @@ export class OrderTimelineComponent {
   }
 }
 
-function pendingNote(status: OrderStatus): string {
-  return status === 'delivered' ? 'ожидает подтверждения' : 'ещё не наступило';
-}
