@@ -126,6 +126,13 @@ button {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 
+  /* Ключевое для скроллируемой колонки: по умолчанию флекс ужимает детей под
+     высоту контейнера вместо переполнения. Карточки с `overflow: hidden` при
+     этом режут содержимое, а прокрутке нечего прокручивать — всё «помещается». */
+  > * {
+    flex-shrink: 0;
+  }
+
   &--tight {
     gap: 8px;
   }
@@ -148,7 +155,13 @@ button {
   align-items: flex-start;
   background: var(--df-card-bg);
   border-radius: var(--df-radius-group);
+  /* Скругление требует обрезки, поэтому строки внутри тем более не должны ужиматься:
+     иначе `overflow: hidden` срежет их содержимое вместо переноса наружу. */
   overflow: hidden;
+
+  > * {
+    flex-shrink: 0;
+  }
 }
 
 .df-row {
