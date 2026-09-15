@@ -25,15 +25,15 @@ export class TechOrdersComponent {
   private readonly telegram = inject(TelegramService);
   private readonly session = inject(SessionService);
 
-  protected readonly subtitle = computed(() => {
-    const person = this.session.person();
-
-    return person ? `${person.orgShort} · ${person.name}` : '';
-  });
-
-  private readonly orders = computed(() =>
-    this.ordersService.forTechnician(this.session.identity()!.personId),
+  protected readonly subtitle = computed(() =>
+    [this.session.orgShort(), this.session.displayName()].filter(Boolean).join(' · '),
   );
+
+  protected readonly state = this.ordersService.state;
+  protected readonly loadError = this.ordersService.error;
+
+  /** `GET /orders` уже отдаёт только заказы, назначенные этому технику. */
+  private readonly orders = this.ordersService.orders;
 
   private readonly newOrders = computed(() =>
     this.orders().filter((order) => order.status === 'sent'),
@@ -73,17 +73,32 @@ export class TechOrdersComponent {
 
   protected readonly newCount = computed(() => this.newOrders().length);
 
+  constructor() {
+    void this.reload();
+  }
+
+  protected reload(): Promise<void> {
+    return this.ordersService.loadOrders();
+  }
+
   protected openOrder(order: Order): void {
     this.router.navigate(['/tech/orders', order.id]);
   }
 
-  protected accept(order: Order): void {
-    this.ordersService.setStatus(order.id, 'accepted');
-    this.telegram.notify('success');
+  protected async accept(order: Order): Promise<void> {
+    try {
+      await this.ordersService.setStatus(order.id, 'accepted');
+      this.telegram.notify('success');
+    } catch {
+      this.telegram.notify('error');
+    }
   }
 
-  protected acceptAll(): void {
-    const accepted = this.ordersService.acceptAllNew(this.session.identity()!.personId);
-    if (accepted) this.telegram.notify('success');
+  protected async acceptAll(): Promise<void> {
+    try {
+      if (await this.ordersService.acceptAllNew()) this.telegram.notify('success');
+    } catch {
+      this.telegram.notify('error');
+    }
   }
 }

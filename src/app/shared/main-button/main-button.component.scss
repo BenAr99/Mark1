@@ -6,9 +6,9 @@
 .area {
   display: flex;
   flex-direction: column;
+  /* Отступ под home indicator добавляет хост приложения — здесь только своя геометрия. */
   padding: 8px 8px 12px;
   background: var(--df-card-bg);
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
 .button {

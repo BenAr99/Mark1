@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { StatusPillComponent } from '../../shared/status-pill/status-pill.component';
 import { dueSuffix, daysUntil, shortDate } from '../format';
 import { Order } from '../order.model';
-import { OrdersService } from '../orders.service';
 import { sortTeeth } from '../teeth';
 
 export type OrderCardVariant = 'doctor' | 'technician';
@@ -16,8 +15,6 @@ export type OrderCardVariant = 'doctor' | 'technician';
   templateUrl: './order-card.component.html',
 })
 export class OrderCardComponent {
-  private readonly orders = inject(OrdersService);
-
   order = input.required<Order>();
   variant = input<OrderCardVariant>('doctor');
 
@@ -42,8 +39,8 @@ export class OrderCardComponent {
     () => this.dueMatters() && daysUntil(this.order().dueDate) <= 1,
   );
 
-  protected readonly technician = computed(() => this.orders.person(this.order().technicianId));
-  protected readonly doctor = computed(() => this.orders.person(this.order().doctorId));
+  protected readonly technician = computed(() => this.order().technician);
+  protected readonly doctor = computed(() => this.order().doctor);
 
   protected readonly canAccept = computed(
     () => this.variant() === 'technician' && this.order().status === 'sent',

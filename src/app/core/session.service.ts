@@ -1,73 +1,35 @@
-import { computed, inject, Service, signal } from '@angular/core';
-import { Person, Role } from '../orders/order.model';
-import { OrdersService } from '../orders/orders.service';
+import { computed, inject, Service } from '@angular/core';
+import { AuthService } from './auth.service';
+import { TelegramService } from './telegram.service';
 
-const STORAGE_KEY = 'dentalflow.demo-identity';
-
-/** Кем зайти в мини-апп, пока нет авторизации и бэкенда. */
-export interface DemoIdentity {
-  role: Role;
-  personId: string;
-}
-
-export const DEMO_IDENTITIES: readonly DemoIdentity[] = [
-  { role: 'doctor', personId: 'd1' },
-  { role: 'technician', personId: 't1' },
-  { role: 'technician', personId: 't2' },
-];
-
+/**
+ * Кто сейчас в мини-аппе. Всё берётся из ответа `POST /auth/telegram`:
+ * роль решает бэкенд по связке Telegram-аккаунта с пользователем.
+ */
 @Service()
 export class SessionService {
-  private readonly orders = inject(OrdersService);
+  private readonly auth = inject(AuthService);
+  private readonly telegram = inject(TelegramService);
 
-  private readonly _identity = signal<DemoIdentity | null>(restore());
+  readonly role = this.auth.role;
+  readonly userId = this.auth.userId;
+  readonly isAuthorized = computed(() => this.auth.accessToken() !== null);
 
-  readonly identity = this._identity.asReadonly();
-  readonly role = computed<Role | null>(() => this._identity()?.role ?? null);
+  /** Профиль из ответа логина — бэкенд шлёт его не обязательно. */
+  readonly person = this.auth.profile;
 
-  /** Текущий пользователь. Обращаться только после проверки `identity()`. */
-  readonly person = computed<Person | null>(() => {
-    const identity = this._identity();
+  /** Пока профиля нет, подписи экранов берём из initData Telegram. */
+  readonly displayName = computed(() => {
+    const person = this.person();
+    if (person) return person.name;
 
-    return identity ? this.orders.person(identity.personId) : null;
+    const user = this.telegram.user();
+
+    return user ? [user.first_name, user.last_name].filter(Boolean).join(' ') : '';
   });
 
+  readonly org = computed(() => this.person()?.org ?? '');
+  readonly orgShort = computed(() => this.person()?.orgShort ?? '');
+
   readonly homeRoute = computed(() => (this.role() === 'technician' ? '/tech' : '/doctor'));
-
-  signIn(identity: DemoIdentity): void {
-    this._identity.set(identity);
-    persist(identity);
-  }
-
-  signOut(): void {
-    this._identity.set(null);
-    persist(null);
-  }
-}
-
-function restore(): DemoIdentity | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-
-    const parsed = JSON.parse(raw) as DemoIdentity;
-
-    return DEMO_IDENTITIES.some(
-      (identity) => identity.role === parsed.role && identity.personId === parsed.personId,
-    )
-      ? parsed
-      : null;
-  } catch {
-    return null;
-  }
-}
-
-function persist(identity: DemoIdentity | null): void {
-  try {
-    identity
-      ? localStorage.setItem(STORAGE_KEY, JSON.stringify(identity))
-      : localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // Приватный режим — роль просто не переживёт перезагрузку.
-  }
 }

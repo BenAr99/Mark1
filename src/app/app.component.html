@@ -1,20 +1,9 @@
-@if (showDemoBar()) {
-  <div class="demo">
-    <button type="button" class="demo__label" (click)="openGate()">Демо</button>
-
-    <div class="demo__switch">
-      @for (option of identities; track option.identity.personId) {
-        <button
-          type="button"
-          class="demo__option"
-          [class.demo__option--active]="isCurrent(option.identity)"
-          [title]="option.name"
-          (click)="switchTo(option.identity)"
-        >
-          {{ option.label }} · {{ option.name.split(' ')[0] }}
-        </button>
-      }
-    </div>
+@if (authExpired()) {
+  <div class="relogin">
+    <span class="relogin__text">
+      Сессия Telegram устарела — закройте и откройте мини-апп заново.
+    </span>
+    <button type="button" class="relogin__retry" (click)="retryAuth()">Повторить</button>
   </div>
 }
 

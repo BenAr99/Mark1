@@ -4,6 +4,8 @@
   flex-direction: column;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   background: var(--df-page-bg);
 }
 
@@ -33,56 +35,28 @@
   color: var(--df-hint);
 }
 
-.gate__note {
-  margin: 6px 0 0;
+.gate__hint {
+  width: 100%;
+  margin: 0;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--df-text-secondary);
+}
+
+.gate__toggle {
+  margin-top: 4px;
   padding: 0 14px;
+  border: 0;
+  background: none;
   font-size: 12px;
-  font-weight: 400;
-  line-height: 17px;
-  color: var(--df-hint);
-}
-
-.person {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.person__avatar {
-  display: block;
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-}
-
-.person__text {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.person__name {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 15px;
   font-weight: 500;
-  color: var(--df-text);
+  color: var(--df-accent);
+  cursor: pointer;
 }
 
-.person__meta {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--df-hint);
-}
-
-/* ---------- Временный блок отладки initData ---------- */
-
-.dbg__caption {
-  margin-top: 14px;
-}
+/* ---------- Диагностика initData ---------- */
 
 .dbg__block {
   display: flex;

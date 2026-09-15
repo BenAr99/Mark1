@@ -80,8 +80,9 @@ export interface Order {
   dueDate: string;
   comment: string;
   files: OrderFile[];
-  doctorId: string;
-  technicianId: string;
+  /** Участники приходят внутри заказа: отдельного справочника людей у API нет. */
+  doctor: Person;
+  technician: Person;
   status: OrderStatus;
   history: OrderEvent[];
   /** Непрочитанные уведомления от бота по этому заказу. */

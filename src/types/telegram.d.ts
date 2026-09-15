@@ -29,6 +29,13 @@ declare global {
     offClick(cb: () => void): void;
   }
 
+  interface TelegramSafeAreaInset {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  }
+
   interface TelegramWebApp {
     ready(): void;
     expand(): void;
@@ -39,6 +46,15 @@ declare global {
     platform: string;
     version: string;
     colorScheme: 'light' | 'dark';
+    /** Видимая высота webview: viewportHeight «прыгает» во время анимаций, stable — нет. */
+    viewportHeight: number;
+    viewportStableHeight: number;
+    isExpanded: boolean;
+    /** Bot API 8.0 и новее — в старых клиентах свойств и метода просто нет. */
+    safeAreaInset?: TelegramSafeAreaInset;
+    contentSafeAreaInset?: TelegramSafeAreaInset;
+    /** Bot API 7.7: отключает жест «свернуть», чтобы работала прокрутка. */
+    disableVerticalSwipes?(): void;
     setHeaderColor(color: string): void;
     onEvent(event: string, cb: () => void): void;
     offEvent(event: string, cb: () => void): void;

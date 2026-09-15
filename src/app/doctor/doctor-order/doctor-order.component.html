@@ -81,9 +81,14 @@
   @if (canConfirm()) {
     <app-main-button text="Подтвердить получение" tone="green" (pressed)="confirmDelivery()" />
   }
-} @else {
-  <app-tg-header title="Заказ не найден" [showBack]="true" (back)="back()" />
+} @else if (loading()) {
+  <app-tg-header title="Заказ" [showBack]="true" (back)="back()" />
   <div class="df-content">
-    <p class="note">Такого заказа нет — возможно, он был создан в другой сессии демо.</p>
+    <p class="note">Загружаем заказ…</p>
+  </div>
+} @else {
+  <app-tg-header title="Заказ недоступен" [showBack]="true" (back)="back()" />
+  <div class="df-content">
+    <p class="note">{{ loadError() || 'Такого заказа нет или он не ваш.' }}</p>
   </div>
 }

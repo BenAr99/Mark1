@@ -1,0 +1,99 @@
+<div class="gate">
+  <header class="gate__head">
+    <h1 class="gate__title">DentalFlow</h1>
+    <p class="gate__subtitle">{{ headline() }}</p>
+  </header>
+
+  <div class="df-group">
+    <div class="df-row">
+      <span class="df-row__label df-row__label--muted">Статус</span>
+      <span class="df-row__value df-row__value--strong">{{ headline() }}</span>
+    </div>
+    @if (hint()) {
+      <div class="df-divider"></div>
+      <p class="gate__hint">{{ hint() }}</p>
+    }
+    @if (authState().status !== 'pending') {
+      <div class="df-divider"></div>
+      <button type="button" class="df-row df-row--tap" (click)="retry()">
+        <span class="df-row__label dbg__action">Попробовать ещё раз</span>
+      </button>
+    }
+  </div>
+
+  <button type="button" class="gate__toggle" (click)="details.set(!details())">
+    {{ details() ? 'Скрыть диагностику' : 'Показать диагностику' }}
+  </button>
+
+  @if (details()) {
+    <div class="df-group">
+      <div class="df-row">
+        <span class="df-row__label">Запуск</span>
+        <span class="df-row__value">
+          {{ launchedInTelegram ? 'из Telegram' : 'вне Telegram' }} · {{ platform }}
+        </span>
+      </div>
+      <div class="df-divider"></div>
+      <div class="df-row">
+        <span class="df-row__label">Версия WebApp</span>
+        <span class="df-row__value">{{ version }}</span>
+      </div>
+      <div class="df-divider"></div>
+
+      <div class="dbg__block">
+        <span class="dbg__title">POST {{ authUrl }}</span>
+        @switch (authState().status) {
+          @case ('skipped') {
+            <span class="dbg__empty">Не отправляли — initData пуста.</span>
+          }
+          @case ('pending') {
+            <span class="dbg__empty">Отправляем…</span>
+          }
+          @case ('ok') {
+            <span class="dbg__ok">Токен получен</span>
+          }
+          @case ('expired') {
+            <span class="dbg__fail">401 — initData устарела.</span>
+            <code class="dbg__value">{{ $any(authState()).detail }}</code>
+          }
+          @case ('error') {
+            <span class="dbg__fail">Ошибка: {{ $any(authState()).message }}</span>
+          }
+        }
+      </div>
+
+      <div class="df-divider"></div>
+      <div class="dbg__block">
+        <span class="dbg__title">initData (сырая строка)</span>
+        @if (initData) {
+          <code class="dbg__raw">{{ initData }}</code>
+        } @else {
+          <span class="dbg__empty">Пусто — мини-апп открыт не из Telegram.</span>
+        }
+      </div>
+
+      @if (initDataParams.length) {
+        <div class="df-divider"></div>
+        <div class="dbg__block">
+          <span class="dbg__title">Разобранные параметры</span>
+          @for (param of initDataParams; track param.key) {
+            <div class="dbg__param">
+              <span class="dbg__key">{{ param.key }}</span>
+              <code class="dbg__value">{{ param.value }}</code>
+            </div>
+          }
+        </div>
+
+        <div class="df-divider"></div>
+        <button type="button" class="df-row df-row--tap" (click)="copyInitData()">
+          <span class="df-row__label dbg__action">Скопировать initData</span>
+          @if (copyState() === 'done') {
+            <span class="df-row__value">Скопировано</span>
+          } @else if (copyState() === 'fail') {
+            <span class="df-row__value">Не вышло — выдели вручную</span>
+          }
+        </button>
+      }
+    </div>
+  }
+</div>

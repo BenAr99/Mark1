@@ -119,7 +119,14 @@
     </button>
 
     @if (pickingTechnician()) {
-      @for (person of technicians; track person.id) {
+      @if (!technicians().length) {
+        <div class="df-divider"></div>
+        <p class="picker__empty">
+          {{ techniciansError() || 'Список исполнителей пуст.' }}
+        </p>
+      }
+
+      @for (person of technicians(); track person.id) {
         <div class="df-divider"></div>
         <button
           type="button"

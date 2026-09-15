@@ -33,12 +33,12 @@ export class DoctorOrderComponent {
   id = input.required<string>();
 
   protected readonly order = computed(() => this.ordersService.byId(this.id()));
+  protected readonly loading = computed(
+    () => !this.order() && this.ordersService.state() === 'loading',
+  );
+  protected readonly loadError = this.ordersService.error;
   protected readonly teeth = computed(() => sortTeeth(this.order()?.teeth ?? []).join(', '));
-  protected readonly technician = computed(() => {
-    const order = this.order();
-
-    return order ? this.ordersService.person(order.technicianId) : null;
-  });
+  protected readonly technician = computed(() => this.order()?.technician ?? null);
 
   protected readonly subtitle = computed(() => {
     const order = this.order();
@@ -80,9 +80,12 @@ export class DoctorOrderComponent {
   protected readonly canConfirm = computed(() => this.order()?.status === 'ready');
 
   constructor() {
+    // Карточку открывают и по прямой ссылке из уведомления бота — тянем её сами.
+    effect(() => void this.ordersService.loadOrder(this.id()));
+
     effect(() => {
       const order = this.order();
-      if (order?.unread) this.ordersService.markRead(order.id);
+      if (order?.unread) void this.ordersService.markRead(order.id);
     });
   }
 
@@ -99,7 +102,9 @@ export class DoctorOrderComponent {
     const order = this.order();
     if (!order || !this.canConfirm()) return;
 
-    this.ordersService.setStatus(order.id, 'delivered');
-    this.telegram.notify('success');
+    void this.ordersService.setStatus(order.id, 'delivered').then(
+      () => this.telegram.notify('success'),
+      () => this.telegram.notify('error'),
+    );
   }
 }

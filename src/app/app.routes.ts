@@ -1,12 +1,12 @@
 import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
+import { AuthGateComponent } from './core/auth-gate/auth-gate.component';
 import { roleGuard } from './core/role.guard';
 import { SessionService } from './core/session.service';
 import { DoctorOrderComponent } from './doctor/doctor-order/doctor-order.component';
 import { DoctorOrdersComponent } from './doctor/doctor-orders/doctor-orders.component';
 import { NewOrderComponent } from './doctor/new-order/new-order.component';
 import { TeethPickerComponent } from './doctor/teeth-picker/teeth-picker.component';
-import { RoleSelectComponent } from './role-select/role-select.component';
 import { TechOrderComponent } from './technician/tech-order/tech-order.component';
 import { TechOrdersComponent } from './technician/tech-orders/tech-orders.component';
 
@@ -17,10 +17,10 @@ export const routes: Routes = [
     redirectTo: () => {
       const session = inject(SessionService);
 
-      return session.role() ? session.homeRoute() : '/role';
+      return session.role() ? session.homeRoute() : '/auth';
     },
   },
-  { path: 'role', component: RoleSelectComponent },
+  { path: 'auth', component: AuthGateComponent },
   {
     path: 'doctor',
     canActivate: [roleGuard('doctor')],

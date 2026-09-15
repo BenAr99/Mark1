@@ -9,3 +9,40 @@
   font-size: 14px;
   color: var(--df-hint);
 }
+
+.failure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--df-radius-group);
+  background: var(--df-card-bg);
+}
+
+.failure__text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--df-text);
+}
+
+.failure__detail {
+  margin: 0;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--df-hint);
+  overflow-wrap: anywhere;
+}
+
+.failure__retry {
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--df-accent);
+  cursor: pointer;
+}

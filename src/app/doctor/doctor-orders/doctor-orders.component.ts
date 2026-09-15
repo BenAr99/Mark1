@@ -32,11 +32,13 @@ export class DoctorOrdersComponent {
   protected readonly filters = FILTERS;
   protected readonly filter = signal<DoctorFilter>('all');
 
-  protected readonly clinic = computed(() => this.session.person()?.org ?? '');
+  protected readonly clinic = computed(() => this.session.org());
 
-  private readonly orders = computed(() =>
-    this.ordersService.forDoctor(this.session.identity()!.personId),
-  );
+  protected readonly state = this.ordersService.state;
+  protected readonly loadError = this.ordersService.error;
+
+  /** `GET /orders` уже отдаёт только заказы этого врача. */
+  private readonly orders = this.ordersService.orders;
 
   protected readonly visibleOrders = computed(() => {
     const orders = this.orders();
@@ -50,6 +52,14 @@ export class DoctorOrdersComponent {
         return orders;
     }
   });
+
+  constructor() {
+    void this.reload();
+  }
+
+  protected reload(): Promise<void> {
+    return this.ordersService.loadOrders();
+  }
 
   protected openOrder(order: Order): void {
     this.router.navigate(['/doctor/orders', order.id]);

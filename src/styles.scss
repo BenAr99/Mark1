@@ -80,6 +80,10 @@
 html,
 body {
   height: 100%;
+  /* Прокрутка живёт внутри экранов: документ не тянем, иначе Telegram примет
+     протяжку за жест «свернуть мини-апп» и скролла не будет вовсе. */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
@@ -116,6 +120,8 @@ button {
   gap: 10px;
   padding: 14px 16px;
   background: var(--df-page-bg);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 
   &--tight {
     gap: 8px;

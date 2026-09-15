@@ -3,10 +3,22 @@
 <div class="df-content">
   <app-segmented [items]="filters" [(value)]="filter" />
 
+  @if (state() === 'error') {
+    <div class="failure">
+      <p class="failure__text">Не удалось загрузить заказы.</p>
+      <p class="failure__detail">{{ loadError() }}</p>
+      <button type="button" class="failure__retry" (click)="reload()">Повторить</button>
+    </div>
+  }
+
   @for (order of visibleOrders(); track order.id) {
     <app-order-card [order]="order" variant="doctor" (open)="openOrder($event)" />
   } @empty {
-    <p class="empty">В этой вкладке пока пусто.</p>
+    @if (state() === 'loading') {
+      <p class="empty">Загружаем заказы…</p>
+    } @else if (state() !== 'error') {
+      <p class="empty">В этой вкладке пока пусто.</p>
+    }
   }
 </div>
 

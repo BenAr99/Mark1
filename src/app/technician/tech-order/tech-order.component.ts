@@ -53,12 +53,12 @@ export class TechOrderComponent {
   id = input.required<string>();
 
   protected readonly order = computed(() => this.ordersService.byId(this.id()));
+  protected readonly loading = computed(
+    () => !this.order() && this.ordersService.state() === 'loading',
+  );
+  protected readonly loadError = this.ordersService.error;
   protected readonly teeth = computed(() => sortTeeth(this.order()?.teeth ?? []).join(', '));
-  protected readonly doctor = computed(() => {
-    const order = this.order();
-
-    return order ? this.ordersService.person(order.doctorId) : null;
-  });
+  protected readonly doctor = computed(() => this.order()?.doctor ?? null);
 
   protected readonly subtitle = computed(() => {
     const order = this.order();
@@ -127,9 +127,12 @@ export class TechOrderComponent {
   });
 
   constructor() {
+    // Карточку открывают и по прямой ссылке из уведомления бота — тянем её сами.
+    effect(() => void this.ordersService.loadOrder(this.id()));
+
     effect(() => {
       const order = this.order();
-      if (order?.unread) this.ordersService.markRead(order.id);
+      if (order?.unread) void this.ordersService.markRead(order.id);
     });
   }
 
@@ -146,15 +149,20 @@ export class TechOrderComponent {
     const order = this.order();
     if (!order || step.state !== 'next') return;
 
-    this.ordersService.setStatus(order.id, step.status);
-    this.telegram.notify('success');
+    void this.ordersService.setStatus(order.id, step.status).then(
+      () => this.telegram.notify('success'),
+      () => this.telegram.notify('error'),
+    );
   }
 
-  protected runAction(): void {
+  protected async runAction(): Promise<void> {
     const order = this.order();
     if (!order) return;
 
-    const next = this.ordersService.advance(order.id);
-    if (next) this.telegram.notify('success');
+    try {
+      if (await this.ordersService.advance(order.id)) this.telegram.notify('success');
+    } catch {
+      this.telegram.notify('error');
+    }
   }
 }
