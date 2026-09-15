@@ -5,6 +5,9 @@ import { TelegramService } from './telegram.service';
 /**
  * Кто сейчас в мини-аппе. Всё берётся из ответа `POST /auth/telegram`:
  * роль решает бэкенд по связке Telegram-аккаунта с пользователем.
+ *
+ * У админа своих заказов нет — он выбирает человека на `/role` и дальше
+ * работает от его лица, поэтому `role()` во время подмены равна его роли.
  */
 @Service()
 export class SessionService {
@@ -14,6 +17,10 @@ export class SessionService {
   readonly role = this.auth.role;
   readonly userId = this.auth.userId;
   readonly isAuthorized = computed(() => this.auth.accessToken() !== null);
+
+  readonly isAdmin = this.auth.isAdmin;
+  readonly isActing = this.auth.isActing;
+  readonly actingAs = this.auth.actingAs;
 
   /** Профиль из ответа логина — бэкенд шлёт его не обязательно. */
   readonly person = this.auth.profile;
@@ -31,5 +38,23 @@ export class SessionService {
   readonly org = computed(() => this.person()?.org ?? '');
   readonly orgShort = computed(() => this.person()?.orgShort ?? '');
 
-  readonly homeRoute = computed(() => (this.role() === 'technician' ? '/tech' : '/doctor'));
+  /** Админ без подмены попадает на выбор, остальные — сразу в свои заказы. */
+  readonly homeRoute = computed(() => {
+    switch (this.role()) {
+      case 'technician':
+        return '/tech';
+      case 'doctor':
+        return '/doctor';
+      default:
+        return '/role';
+    }
+  });
+
+  actAs(userId: string): Promise<void> {
+    return this.auth.actAs(userId);
+  }
+
+  stopActing(): void {
+    this.auth.stopActing();
+  }
 }

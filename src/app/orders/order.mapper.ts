@@ -7,12 +7,12 @@ import {
   ORDER_FLOW,
   OrderStatus,
   Person,
-  Role,
+  WorkRole,
 } from './order.model';
 
-/** Исполнитель из `GET /technicians`: профиль плюс текущая загрузка. */
-export interface TechnicianOption extends Person {
-  /** Сколько заказов у техника сейчас в работе. */
+/** Участник из `GET /technicians` или `GET /doctors`: профиль плюс текущая загрузка. */
+export interface PersonOption extends Person {
+  /** Сколько заказов у человека сейчас в работе. */
   load: number;
 }
 
@@ -22,12 +22,13 @@ export function parseOrderList(raw: unknown): Order[] {
   );
 }
 
-export function parseTechnicians(raw: unknown): TechnicianOption[] {
-  return asArray(raw, 'GET /technicians').map((item, index) => {
-    const where = `GET /technicians[${index}]`;
+/** `GET /technicians` и `GET /doctors` устроены одинаково — различает их только роль. */
+export function parsePeople(raw: unknown, role: WorkRole, path: string): PersonOption[] {
+  return asArray(raw, path).map((item, index) => {
+    const where = `${path}[${index}]`;
     const record = asRecord(item, where);
 
-    return { ...parsePerson(record, 'technician', where), load: numberField(record, 'load') };
+    return { ...parsePerson(record, role, where), load: numberField(record, 'load') };
   });
 }
 
@@ -63,7 +64,7 @@ export function parseOrder(raw: unknown, where = 'заказ'): Order {
  * Короткие подписи бэкенд слать не обязан — это чистое оформление,
  * и восстановить их из полного имени дешевле, чем держать в контракте.
  */
-export function parsePerson(raw: unknown, role: Role, where: string): Person {
+export function parsePerson(raw: unknown, role: WorkRole, where: string): Person {
   const person = asRecord(raw, where);
   const name = requireString(person, 'name', where);
   const org = stringField(person, 'org');
@@ -90,7 +91,7 @@ export function shortenName(full: string): string {
 }
 
 /** «Рустам Ахметов» → «Р. Ахметов»; у врача вместо инициала — «д-р». */
-function shortPersonName(full: string, role: Role): string {
+function shortPersonName(full: string, role: WorkRole): string {
   const parts = full.split(/\s+/).filter(Boolean);
   const surname = parts.length > 1 ? parts[parts.length - 1] : parts[0];
   if (!surname) return full;

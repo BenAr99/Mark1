@@ -1,0 +1,93 @@
+@use '../../shared/screen' as screen;
+
+@include screen.host;
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.person__avatar {
+  display: block;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.person__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.person__name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--df-text);
+}
+
+.person__meta {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--df-hint);
+}
+
+.empty {
+  width: 100%;
+  margin: 0;
+  padding: 16px 14px;
+  font-size: 14px;
+  color: var(--df-hint);
+}
+
+.note {
+  margin: 4px 0 0;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  color: var(--df-hint);
+}
+
+.failure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--df-radius-group);
+  background: var(--df-card-bg);
+}
+
+.failure__text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--df-text);
+}
+
+.failure__detail {
+  margin: 0;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--df-hint);
+  overflow-wrap: anywhere;
+}
+
+.failure__retry {
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--df-accent);
+  cursor: pointer;
+}

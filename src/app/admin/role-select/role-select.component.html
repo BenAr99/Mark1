@@ -1,0 +1,63 @@
+<app-tg-header title="Режим админа" [subtitle]="subtitle()" />
+
+<div class="df-content">
+  <app-segmented [items]="filters" [(value)]="filter" />
+
+  @if (loadError()) {
+    <div class="failure">
+      <p class="failure__text">Не удалось загрузить список.</p>
+      <p class="failure__detail">{{ loadError() }}</p>
+      <button type="button" class="failure__retry" (click)="reload()">Повторить</button>
+    </div>
+  }
+
+  <div class="df-group">
+    @for (person of people(); track person.id; let first = $first) {
+      @if (!first) {
+        <div class="df-divider"></div>
+      }
+      <button
+        type="button"
+        class="df-row df-row--tall df-row--tap"
+        [disabled]="!!entering()"
+        (click)="enter(person)"
+      >
+        <span class="person">
+          <img
+            class="person__avatar"
+            src="assets/figma/avatar-tech-36.svg"
+            width="36"
+            height="36"
+            alt=""
+          />
+          <span class="person__text">
+            <span class="person__name">
+              {{ person.name }}
+              <span class="df-who" [attr.data-role]="person.role">
+                {{ person.role === 'doctor' ? 'Врач' : 'Техник' }}
+              </span>
+            </span>
+            <span class="person__meta">{{ person.org }} · {{ person.load }} в работе</span>
+          </span>
+        </span>
+
+        @if (entering() === person.id) {
+          <span class="df-row__value df-row__value--placeholder">Входим…</span>
+        } @else if (currentId() === person.id) {
+          <img src="assets/figma/radio-checked.svg" width="20" height="20" alt="Текущий" />
+        } @else {
+          <span class="df-chevron">›</span>
+        }
+      </button>
+    } @empty {
+      @if (!loadError()) {
+        <p class="empty">Список пуст.</p>
+      }
+    }
+  </div>
+
+  <p class="note">
+    Вход от чужого лица выдаёт отдельный токен: приложение видит ровно то же, что видит сам
+    пользователь. Вернуться в режим админа можно полосой сверху.
+  </p>
+</div>

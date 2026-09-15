@@ -1,7 +1,8 @@
 import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
+import { RoleSelectComponent } from './admin/role-select/role-select.component';
 import { AuthGateComponent } from './core/auth-gate/auth-gate.component';
-import { roleGuard } from './core/role.guard';
+import { adminGuard, roleGuard } from './core/role.guard';
 import { SessionService } from './core/session.service';
 import { DoctorOrderComponent } from './doctor/doctor-order/doctor-order.component';
 import { DoctorOrdersComponent } from './doctor/doctor-orders/doctor-orders.component';
@@ -21,6 +22,7 @@ export const routes: Routes = [
     },
   },
   { path: 'auth', component: AuthGateComponent },
+  { path: 'role', canActivate: [adminGuard], component: RoleSelectComponent },
   {
     path: 'doctor',
     canActivate: [roleGuard('doctor')],

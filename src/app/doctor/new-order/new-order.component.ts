@@ -27,7 +27,7 @@ export class NewOrderComponent {
   protected readonly workTypes = WORK_TYPES;
   protected readonly shades = SHADES;
   protected readonly technicians = this.ordersService.technicians;
-  protected readonly techniciansError = this.ordersService.techniciansError;
+  protected readonly peopleError = this.ordersService.peopleError;
 
   protected readonly pickingTechnician = signal(false);
   protected readonly submitting = signal(false);

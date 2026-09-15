@@ -40,6 +40,54 @@
   cursor: pointer;
 }
 
+/* Полоса подмены: админ смотрит приложение чужими глазами. */
+.acting {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #1c1c1e;
+  color: #ffffff;
+}
+
+.acting__label {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.acting__text {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.acting__exit {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
 .shell {
   display: flex;
   flex: 1;
