@@ -2,6 +2,10 @@ import { computed, Service, signal } from '@angular/core';
 import { parseFileKind } from '../orders/order.mapper';
 import { OrderFile } from '../orders/order.model';
 
+export interface PendingOrderFile extends OrderFile {
+  source: File;
+}
+
 /** Как трактовать выбранные зубы — вопрос со схемы FDI (frame 4:148). */
 export type TeethWork = 'bridge' | 'separate';
 
@@ -14,7 +18,7 @@ export interface NewOrderDraft {
   dueDate: string;
   shade: string;
   technicianId: string | null;
-  files: OrderFile[];
+  files: PendingOrderFile[];
   comment: string;
 }
 
@@ -75,10 +79,16 @@ export class NewOrderDraftService {
   addFiles(list: FileList | null): void {
     if (!list?.length) return;
 
-    const files: OrderFile[] = Array.from(list).map((file) => ({
+    const files: PendingOrderFile[] = Array.from(list).map((file) => ({
       id: crypto.randomUUID(),
       name: file.name,
       kind: parseFileKind(file.name),
+      size: file.size,
+      contentType: file.type || null,
+      uploadedAt: null,
+      uploaded: false,
+      downloadUrl: null,
+      source: file,
     }));
 
     this._draft.update((draft) => ({ ...draft, files: [...draft.files, ...files] }));

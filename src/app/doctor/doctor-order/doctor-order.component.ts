@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input } f
 import { Router } from '@angular/router';
 import { TelegramService } from '../../core/telegram.service';
 import { dateTime, longDate, plural } from '../../orders/format';
+import { OrderFile } from '../../orders/order.model';
 import { OrderTimelineComponent } from '../../orders/order-timeline/order-timeline.component';
 import { OrdersService } from '../../orders/orders.service';
 import { sortTeeth } from '../../orders/teeth';
@@ -96,6 +97,18 @@ export class DoctorOrderComponent {
   protected writeToTechnician(): void {
     const technician = this.technician();
     if (technician) this.telegram.openChat(technician.telegram);
+  }
+
+  protected async downloadFile(file: OrderFile): Promise<void> {
+    const order = this.order();
+    if (!order) return;
+
+    try {
+      await this.ordersService.downloadFile(order.id, file);
+    } catch {
+      this.telegram.notify('error');
+      this.telegram.alert(`Не удалось скачать файл «${file.name}».`);
+    }
   }
 
   protected confirmDelivery(): void {

@@ -49,7 +49,7 @@
 
     <p class="df-caption">Файлы · {{ filesLabel() }}</p>
     <div class="df-group">
-      <app-files-strip [files]="order.files" />
+      <app-files-strip [files]="order.files" (open)="downloadFile($event)" />
     </div>
 
     <div class="df-group">
@@ -72,7 +72,6 @@
         <span class="df-chevron">›</span>
       </button>
     </div>
-
   </div>
 
   @if (canConfirm()) {

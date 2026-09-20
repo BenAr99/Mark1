@@ -3,8 +3,14 @@ import { effect, inject, Service, signal, untracked } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { API_BASE, describeHttpError } from '../core/api';
 import { AuthService } from '../core/auth.service';
-import { parseOrder, parseOrderList, parsePeople, PersonOption } from './order.mapper';
-import { FileKind, Order, OrderStatus, nextStatus, statusIndex } from './order.model';
+import {
+  parseOrder,
+  parseOrderFile,
+  parseOrderList,
+  parsePeople,
+  PersonOption,
+} from './order.mapper';
+import { FileKind, Order, OrderFile, OrderStatus, nextStatus, statusIndex } from './order.model';
 import { sortTeeth } from './teeth';
 
 /** Справочники формы: фиксированные номенклатуры, у API отдельной ручки для них нет. */
@@ -32,7 +38,12 @@ export interface NewOrderInput {
   shade: string;
   comment: string;
   technicianId: string | null;
-  files: readonly { name: string; kind: FileKind }[];
+  files: readonly { name: string; kind: FileKind; source: File }[];
+}
+
+export interface CreateOrderResult {
+  order: Order;
+  failedFiles: readonly string[];
 }
 
 @Service()
@@ -167,19 +178,17 @@ export class OrdersService {
   }
 
   /** Создаёт заказ и возвращает его в том виде, в каком его завёл бэкенд. */
-  async create(draft: NewOrderInput): Promise<Order> {
-    const created = parseOrder(
+  async create(draft: NewOrderInput): Promise<CreateOrderResult> {
+    let created = parseOrder(
       await firstValueFrom(
         this.http.post<unknown>(`${API_BASE}/orders`, {
           patientName: draft.patientName.trim(),
           teeth: sortTeeth([...draft.teeth]),
-          teethWork: draft.teethWork,
           workType: draft.workType,
-          dueDate: draft.dueDate,
+          dueDate: draft.dueDate || null,
           shade: draft.shade,
           comment: draft.comment.trim(),
-          technicianId: draft.technicianId,
-          // Содержимое вложений пока не загружаем — отправляем только имена.
+          technicianId: Number(draft.technicianId),
           files: draft.files.map((file) => ({ name: file.name, kind: file.kind })),
         }),
       ),
@@ -188,7 +197,57 @@ export class OrdersService {
 
     this.upsert(created);
 
-    return created;
+    const failedFiles: string[] = [];
+    const uploadedFiles = [...created.files];
+
+    for (const [index, pending] of draft.files.entries()) {
+      const metadata = created.files[index];
+      if (!metadata) {
+        failedFiles.push(pending.name);
+        continue;
+      }
+
+      try {
+        uploadedFiles[index] = await this.uploadFile(created.id, metadata.id, pending.source);
+      } catch {
+        failedFiles.push(pending.name);
+      }
+    }
+
+    created = { ...created, files: uploadedFiles };
+    this.upsert(created);
+
+    return { order: created, failedFiles };
+  }
+
+  /** Загружает байты в уже созданную на бэкенде запись файла. */
+  private async uploadFile(orderId: string, fileId: string, source: File): Promise<OrderFile> {
+    const response = await firstValueFrom(
+      this.http.put<unknown>(`${API_BASE}/orders/${orderId}/files/${fileId}`, source, {
+        headers: { 'Content-Type': source.type || 'application/octet-stream' },
+      }),
+    );
+
+    return parseOrderFile(response, `PUT /orders/${orderId}/files/${fileId}`);
+  }
+
+  /** Скачивает защищённое вложение и передаёт его браузеру. */
+  async downloadFile(orderId: string, file: OrderFile): Promise<void> {
+    const blob = await firstValueFrom(
+      this.http.get(`${API_BASE}/orders/${orderId}/files/${file.id}/download`, {
+        responseType: 'blob',
+      }),
+    );
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = file.name;
+    link.style.display = 'none';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1_000);
   }
 
   /** Переводит заказ вперёд по цепочке. Назад не двигаем — это решает бэкенд. */

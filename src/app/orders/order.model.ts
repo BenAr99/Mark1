@@ -50,6 +50,11 @@ export interface OrderFile {
   id: string;
   name: string;
   kind: FileKind;
+  size: number | null;
+  contentType: string | null;
+  uploadedAt: string | null;
+  uploaded: boolean;
+  downloadUrl: string | null;
 }
 
 export interface OrderEvent {

@@ -1,6 +1,15 @@
 <div class="strip">
   @for (file of files(); track file.id; let i = $index) {
-    <div class="df-file strip__tile" [attr.data-tone]="tone(file, i)">
+    <div
+      class="df-file strip__tile"
+      [class.strip__tile--open]="!editable() && file.uploaded"
+      [attr.data-tone]="tone(file, i)"
+      [attr.role]="!editable() && file.uploaded ? 'button' : null"
+      [attr.tabindex]="!editable() && file.uploaded ? 0 : null"
+      [attr.aria-label]="!editable() && file.uploaded ? 'Скачать ' + file.name : null"
+      (click)="activate(file)"
+      (keydown)="activateFromKeyboard($event, file)"
+    >
       <span class="df-file__kind">{{ label(file) }}</span>
       <span class="df-file__name">{{ file.name }}</span>
 
@@ -13,6 +22,8 @@
         >
           ×
         </button>
+      } @else if (!file.uploaded) {
+        <span class="strip__pending">Не загружен</span>
       }
     </div>
   } @empty {

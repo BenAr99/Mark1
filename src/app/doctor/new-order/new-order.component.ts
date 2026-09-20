@@ -106,10 +106,15 @@ export class NewOrderComponent {
 
     try {
       // Врача и начальный статус проставляет бэкенд — он знает, кто прислал токен.
-      const order = await this.ordersService.create(this.draft());
+      const { order, failedFiles } = await this.ordersService.create(this.draft());
 
       this.drafts.reset();
-      this.telegram.notify('success');
+      if (failedFiles.length) {
+        this.telegram.notify('warning');
+        this.telegram.alert(`Заказ создан, но не удалось загрузить: ${failedFiles.join(', ')}.`);
+      } else {
+        this.telegram.notify('success');
+      }
       void this.router.navigate(['/doctor/orders', order.id]);
     } catch (error) {
       this.telegram.notify('error');

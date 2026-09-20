@@ -80,7 +80,7 @@
 
     <p class="df-caption">Файлы от врача</p>
     <div class="df-group">
-      <app-files-strip [files]="order.files" />
+      <app-files-strip [files]="order.files" (open)="downloadFile($event)" />
     </div>
 
     <div class="df-group">

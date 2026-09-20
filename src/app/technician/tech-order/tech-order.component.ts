@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input } f
 import { Router } from '@angular/router';
 import { TelegramService } from '../../core/telegram.service';
 import { dateTime, longDate } from '../../orders/format';
-import { ORDER_STATUS_LABEL, OrderStatus, statusIndex } from '../../orders/order.model';
+import { OrderFile, ORDER_STATUS_LABEL, OrderStatus, statusIndex } from '../../orders/order.model';
 import { OrdersService } from '../../orders/orders.service';
 import { sortTeeth } from '../../orders/teeth';
 import { FilesStripComponent } from '../../shared/files-strip/files-strip.component';
@@ -143,6 +143,18 @@ export class TechOrderComponent {
   protected writeToDoctor(): void {
     const doctor = this.doctor();
     if (doctor) this.telegram.openChat(doctor.telegram);
+  }
+
+  protected async downloadFile(file: OrderFile): Promise<void> {
+    const order = this.order();
+    if (!order) return;
+
+    try {
+      await this.ordersService.downloadFile(order.id, file);
+    } catch {
+      this.telegram.notify('error');
+      this.telegram.alert(`Не удалось скачать файл «${file.name}».`);
+    }
   }
 
   protected pickStep(step: StatusStep): void {

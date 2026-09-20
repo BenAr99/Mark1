@@ -127,15 +127,25 @@ function parseHistory(raw: unknown): OrderEvent[] {
 function parseFiles(raw: unknown): OrderFile[] {
   if (!Array.isArray(raw)) return [];
 
-  return raw.filter(isRecord).map((file, index) => {
-    const name = stringField(file, 'name');
+  return raw.filter(isRecord).map((file, index) => parseOrderFile(file, `файл ${index + 1}`));
+}
 
-    return {
-      id: stringField(file, 'id') || `${index}`,
-      name,
-      kind: parseFileKind(stringField(file, 'kind') || name),
-    };
-  });
+export function parseOrderFile(raw: unknown, where = 'файл'): OrderFile {
+  const file = asRecord(raw, where);
+  const name = requireString(file, 'name', where);
+  const sizeValue = field(file, 'size');
+  const uploadedValue = field(file, 'uploaded');
+
+  return {
+    id: requireString(file, 'id', where),
+    name,
+    kind: parseFileKind(stringField(file, 'kind') || name),
+    size: typeof sizeValue === 'number' ? sizeValue : null,
+    contentType: stringField(file, 'contentType') || null,
+    uploadedAt: stringField(file, 'uploadedAt') || null,
+    uploaded: typeof uploadedValue === 'boolean' ? uploadedValue : true,
+    downloadUrl: stringField(file, 'downloadUrl') || null,
+  };
 }
 
 /** Тип вложения бэкенд может не присылать — тогда определяем по расширению. */

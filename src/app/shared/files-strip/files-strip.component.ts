@@ -16,6 +16,7 @@ export class FilesStripComponent {
 
   add = output<FileList | null>();
   remove = output<string>();
+  open = output<OrderFile>();
 
   /** Скан всегда серо-синий, фото чередуются тёплым и холодным — как в макете. */
   protected tone(file: OrderFile, index: number): Tone {
@@ -34,5 +35,16 @@ export class FilesStripComponent {
 
     this.add.emit(input.files);
     input.value = '';
+  }
+
+  protected activate(file: OrderFile): void {
+    if (!this.editable() && file.uploaded) this.open.emit(file);
+  }
+
+  protected activateFromKeyboard(event: KeyboardEvent, file: OrderFile): void {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+
+    event.preventDefault();
+    this.activate(file);
   }
 }
