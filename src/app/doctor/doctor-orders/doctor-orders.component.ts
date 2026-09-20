@@ -65,6 +65,10 @@ export class DoctorOrdersComponent {
     this.router.navigate(['/doctor/orders', order.id]);
   }
 
+  protected openAuditLog(): void {
+    this.router.navigate(['/audit-log']);
+  }
+
   protected createOrder(): void {
     this.router.navigate(['/doctor/new']);
   }

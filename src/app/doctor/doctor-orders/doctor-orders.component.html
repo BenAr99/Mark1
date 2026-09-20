@@ -3,6 +3,12 @@
 <div class="df-content">
   <app-segmented [items]="filters" [(value)]="filter" />
 
+  <button type="button" class="audit-link" (click)="openAuditLog()">
+    <span class="audit-link__icon" aria-hidden="true">↺</span>
+    <span class="audit-link__text">История действий</span>
+    <span class="df-chevron" aria-hidden="true">›</span>
+  </button>
+
   @if (state() === 'error') {
     <div class="failure">
       <p class="failure__text">Не удалось загрузить заказы.</p>

@@ -2,6 +2,41 @@
 
 @include screen.host;
 
+.audit-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--df-radius-group);
+  background: var(--df-card-bg);
+  text-align: left;
+  cursor: pointer;
+}
+
+.audit-link__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--df-accent-bg);
+  color: var(--df-accent-ink);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.audit-link__text {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--df-text);
+}
+
 .empty {
   width: 100%;
   margin: 24px 0 0;
