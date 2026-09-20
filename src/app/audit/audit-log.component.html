@@ -1,0 +1,70 @@
+<app-tg-header title="История действий" [subtitle]="subtitle()" [showBack]="true" (back)="back()" />
+
+<div class="df-content audit-content">
+  <form class="search" (submit)="$event.preventDefault(); search(orderId.value)">
+    <label class="search__label" for="audit-order-id">Поиск по номеру заказа</label>
+    <div class="search__controls">
+      <input
+        #orderId
+        id="audit-order-id"
+        class="search__input"
+        type="search"
+        inputmode="text"
+        autocomplete="off"
+        placeholder="Например, 123"
+        aria-label="Номер заказа"
+        [value]="activeOrderId()"
+      />
+      @if (activeOrderId()) {
+        <button type="button" class="search__clear" (click)="clear(orderId)">Все</button>
+      }
+      <button type="submit" class="search__submit">Найти</button>
+    </div>
+  </form>
+
+  @if (state() === 'error') {
+    <div class="failure" role="alert">
+      <p class="failure__text">Не удалось загрузить историю.</p>
+      <p class="failure__detail">{{ loadError() }}</p>
+      <button type="button" class="failure__retry" (click)="reload()">Повторить</button>
+    </div>
+  }
+
+  @if (state() === 'loading') {
+    <p class="empty">Загружаем историю…</p>
+  } @else if (state() === 'ready') {
+    <section class="timeline" aria-label="История действий">
+      @for (entry of entries(); track entry.id) {
+        <article class="entry">
+          <span class="entry__dot" aria-hidden="true"></span>
+          <div class="entry__card">
+            <div class="entry__heading">
+              <p class="entry__action">{{ actionLabel(entry.action) }}</p>
+              <time class="entry__time" [attr.datetime]="entry.createdAt">
+                {{ formatDate(entry.createdAt) }}
+              </time>
+            </div>
+
+            <p class="entry__description">{{ entry.description }}</p>
+
+            <div class="entry__meta">
+              <span>{{ entry.actor?.name ?? 'Система' }}</span>
+              @if (entry.actor; as actor) {
+                <span class="df-who" [attr.data-role]="actor.role">
+                  {{ actor.role === 'doctor' ? 'Врач' : 'Техник' }}
+                </span>
+              }
+              @if (entry.orderId) {
+                <span class="entry__order">Заказ №{{ entry.orderId }}</span>
+              }
+            </div>
+          </div>
+        </article>
+      } @empty {
+        <p class="empty">
+          {{ activeOrderId() ? 'По этому заказу действий пока нет.' : 'История пока пуста.' }}
+        </p>
+      }
+    </section>
+  }
+</div>

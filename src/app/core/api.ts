@@ -23,14 +23,9 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-/**
- * Поле ответа без оглядки на стиль именования бэкенда: `patientName` и
- * `patient_name` читаются одинаково, чтобы контракт не ломался на мелочи.
- */
+/** Поле ответа API. Внутренний контракт проекта использует только camelCase. */
 export function field(raw: Record<string, unknown>, name: string): unknown {
-  const snake = name.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-
-  return raw[name] ?? raw[snake];
+  return raw[name];
 }
 
 export function stringField(raw: Record<string, unknown>, name: string): string {

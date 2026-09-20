@@ -1,8 +1,9 @@
 import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { AuthGateComponent } from './core/auth-gate/auth-gate.component';
-import { noRoleGuard, roleGuard } from './core/role.guard';
+import { authorizedGuard, noRoleGuard, roleGuard } from './core/role.guard';
 import { SessionService } from './core/session.service';
+import { AuditLogComponent } from './audit/audit-log.component';
 import { DoctorOrderComponent } from './doctor/doctor-order/doctor-order.component';
 import { DoctorOrdersComponent } from './doctor/doctor-orders/doctor-orders.component';
 import { NewOrderComponent } from './doctor/new-order/new-order.component';
@@ -23,6 +24,12 @@ export const routes: Routes = [
   },
   { path: 'auth', component: AuthGateComponent },
   { path: 'role', canActivate: [noRoleGuard], component: RoleSelectComponent },
+  { path: 'audit-log', canActivate: [authorizedGuard], component: AuditLogComponent },
+  {
+    path: 'orders/:orderId/audit-log',
+    canActivate: [authorizedGuard],
+    component: AuditLogComponent,
+  },
   {
     path: 'doctor',
     canActivate: [roleGuard('doctor')],

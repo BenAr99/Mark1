@@ -27,3 +27,13 @@ export const noRoleGuard: CanActivateFn = () => {
 
   return router.parseUrl(session.isAuthorized() ? session.homeRoute() : '/auth');
 };
+
+/** Общие экраны, доступные врачу и технику после выбора роли. */
+export const authorizedGuard: CanActivateFn = () => {
+  const session = inject(SessionService);
+  const router = inject(Router);
+
+  if (session.isAuthorized() && session.role() !== null) return true;
+
+  return router.parseUrl(session.isAuthorized() ? '/role' : '/auth');
+};

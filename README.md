@@ -44,16 +44,18 @@ npm start          # http://localhost:4205
 
 ## Экраны
 
-| Маршрут              | Экран макета                | Компонент               |
-| -------------------- | --------------------------- | ----------------------- |
-| `/auth`              | —                           | `AuthGateComponent`     |
-| `/role`              | — (первый вход)             | `RoleSelectComponent`   |
-| `/doctor`            | 01 · Врач — Мои заказы      | `DoctorOrdersComponent` |
-| `/doctor/new`        | 02 · Врач — Новый заказ     | `NewOrderComponent`     |
-| `/doctor/new/teeth`  | 03 · Выбор зубов (FDI)      | `TeethPickerComponent`  |
-| `/doctor/orders/:id` | 04 · Врач — Карточка заказа | `DoctorOrderComponent`  |
-| `/tech`              | 06 · Техник — Входящие      | `TechOrdersComponent`   |
-| `/tech/orders/:id`   | 07 · Техник — Заказ         | `TechOrderComponent`    |
+| Маршрут                 | Экран макета                | Компонент               |
+| ----------------------- | --------------------------- | ----------------------- |
+| `/auth`                 | —                           | `AuthGateComponent`     |
+| `/role`                 | — (первый вход)             | `RoleSelectComponent`   |
+| `/doctor`               | 01 · Врач — Мои заказы      | `DoctorOrdersComponent` |
+| `/doctor/new`           | 02 · Врач — Новый заказ     | `NewOrderComponent`     |
+| `/doctor/new/teeth`     | 03 · Выбор зубов (FDI)      | `TeethPickerComponent`  |
+| `/doctor/orders/:id`    | 04 · Врач — Карточка заказа | `DoctorOrderComponent`  |
+| `/tech`                 | 06 · Техник — Входящие      | `TechOrdersComponent`   |
+| `/tech/orders/:id`      | 07 · Техник — Заказ         | `TechOrderComponent`    |
+| `/audit-log`            | История действий            | `AuditLogComponent`     |
+| `/orders/:id/audit-log` | История конкретного заказа  | `AuditLogComponent`     |
 
 Экран 05 «Чат по заказу» намеренно не реализован: переписка ведётся в обычном диалоге Telegram.
 На карточках заказа есть строка «Написать технику» / «Написать врачу» — она открывает личный чат
@@ -90,21 +92,39 @@ src/app/
 
 Заказы приходят с бэкенда, замоканных данных на фронте нет.
 
-| Запрос                     | Что делает                                |
-| -------------------------- | ----------------------------------------- |
-| `GET /orders`              | свои заказы (врачу — свои, технику — его) |
-| `GET /orders/{id}`         | карточка заказа                           |
-| `POST /orders`             | создать заказ (только врач)               |
-| `POST /orders/{id}/status` | сменить статус                            |
-| `POST /orders/{id}/read`   | отметить историю прочитанной              |
-| `GET /technicians`         | техники для выбора, с полем `load`        |
-| `POST /me/role`            | закрепить роль за аккаунтом               |
+| Запрос                       | Что делает                                |
+| ---------------------------- | ----------------------------------------- |
+| `GET /orders`                | свои заказы (врачу — свои, технику — его) |
+| `GET /orders/{id}`           | карточка заказа                           |
+| `POST /orders`               | создать заказ (только врач)               |
+| `POST /orders/{id}/status`   | сменить статус                            |
+| `POST /orders/{id}/read`     | отметить историю прочитанной              |
+| `GET /technicians`           | техники для выбора, с полем `load`        |
+| `POST /me/role`              | закрепить роль за аккаунтом               |
+| `GET /audit-log`             | общий журнал действий                     |
+| `GET /orders/{id}/audit-log` | журнал действий конкретного заказа        |
 
 Адрес бэкенда — `API_BASE` в `src/app/core/api.ts`.
 
+Обе ручки журнала возвращают массив записей одного формата:
+
+```json
+{
+  "id": "audit-42",
+  "action": "orderStatusChanged",
+  "orderId": "123",
+  "actor": { "name": "Рустам Ахметов", "role": "technician" },
+  "createdAt": "2026-09-20T14:30:00Z",
+  "description": "Статус изменён: Отправлено → Принято"
+}
+```
+
+Все поля собственного API проекта возвращаются только в `camelCase`. Форматы внешнего Telegram
+API (`auth_date`, `first_name` и другие) сохраняют заданные Telegram имена.
+
 Участники (`doctor`, `technician`) приходят объектами внутри заказа: отдельного справочника людей
 у API нет. Короткие подписи — «Иванов А. П.», «д-р Кулиев», «ОртоЛаб» — фронт выводит сам в
-`order.mapper.ts`, слать их не нужно. Там же поля читаются и в `camelCase`, и в `snake_case`.
+`order.mapper.ts`, слать их не нужно. Поля ответов читаются строго в `camelCase`.
 
 Номенклатуры формы (`WORK_TYPES`, `SHADES`) остаются константами в `orders.service.ts` — это
 фиксированные списки, ручки под них нет. Реальные вложения не загружаются: в `POST /orders`
