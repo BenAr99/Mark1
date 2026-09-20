@@ -36,7 +36,7 @@ export class OrderCardComponent {
   });
 
   protected readonly dueUrgent = computed(
-    () => this.dueMatters() && daysUntil(this.order().dueDate) <= 1,
+    () => this.dueMatters() && (daysUntil(this.order().dueDate) ?? Number.POSITIVE_INFINITY) <= 1,
   );
 
   protected readonly technician = computed(() => this.order().technician);

@@ -1,16 +1,7 @@
 import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
-import { AuthGateComponent } from './core/auth-gate/auth-gate.component';
 import { authorizedGuard, noRoleGuard, roleGuard } from './core/role.guard';
 import { SessionService } from './core/session.service';
-import { AuditLogComponent } from './audit/audit-log.component';
-import { DoctorOrderComponent } from './doctor/doctor-order/doctor-order.component';
-import { DoctorOrdersComponent } from './doctor/doctor-orders/doctor-orders.component';
-import { NewOrderComponent } from './doctor/new-order/new-order.component';
-import { TeethPickerComponent } from './doctor/teeth-picker/teeth-picker.component';
-import { RoleSelectComponent } from './role-select/role-select.component';
-import { TechOrderComponent } from './technician/tech-order/tech-order.component';
-import { TechOrdersComponent } from './technician/tech-orders/tech-orders.component';
 
 export const routes: Routes = [
   {
@@ -22,30 +13,81 @@ export const routes: Routes = [
       return session.isAuthorized() ? session.homeRoute() : '/auth';
     },
   },
-  { path: 'auth', component: AuthGateComponent },
-  { path: 'role', canActivate: [noRoleGuard], component: RoleSelectComponent },
-  { path: 'audit-log', canActivate: [authorizedGuard], component: AuditLogComponent },
+  {
+    path: 'auth',
+    loadComponent: () =>
+      import('./core/auth-gate/auth-gate.component').then((module) => module.AuthGateComponent),
+  },
+  {
+    path: 'role',
+    canActivate: [noRoleGuard],
+    loadComponent: () =>
+      import('./role-select/role-select.component').then((module) => module.RoleSelectComponent),
+  },
+  {
+    path: 'audit-log',
+    canActivate: [authorizedGuard],
+    loadComponent: () =>
+      import('./audit/audit-log.component').then((module) => module.AuditLogComponent),
+  },
   {
     path: 'orders/:orderId/audit-log',
     canActivate: [authorizedGuard],
-    component: AuditLogComponent,
+    loadComponent: () =>
+      import('./audit/audit-log.component').then((module) => module.AuditLogComponent),
   },
   {
     path: 'doctor',
     canActivate: [roleGuard('doctor')],
     children: [
-      { path: '', component: DoctorOrdersComponent },
-      { path: 'new', component: NewOrderComponent },
-      { path: 'new/teeth', component: TeethPickerComponent },
-      { path: 'orders/:id', component: DoctorOrderComponent },
+      {
+        path: '',
+        loadComponent: () =>
+          import('./doctor/doctor-orders/doctor-orders.component').then(
+            (module) => module.DoctorOrdersComponent,
+          ),
+      },
+      {
+        path: 'new',
+        loadComponent: () =>
+          import('./doctor/new-order/new-order.component').then(
+            (module) => module.NewOrderComponent,
+          ),
+      },
+      {
+        path: 'new/teeth',
+        loadComponent: () =>
+          import('./doctor/teeth-picker/teeth-picker.component').then(
+            (module) => module.TeethPickerComponent,
+          ),
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () =>
+          import('./doctor/doctor-order/doctor-order.component').then(
+            (module) => module.DoctorOrderComponent,
+          ),
+      },
     ],
   },
   {
     path: 'tech',
     canActivate: [roleGuard('technician')],
     children: [
-      { path: '', component: TechOrdersComponent },
-      { path: 'orders/:id', component: TechOrderComponent },
+      {
+        path: '',
+        loadComponent: () =>
+          import('./technician/tech-orders/tech-orders.component').then(
+            (module) => module.TechOrdersComponent,
+          ),
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () =>
+          import('./technician/tech-order/tech-order.component').then(
+            (module) => module.TechOrderComponent,
+          ),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

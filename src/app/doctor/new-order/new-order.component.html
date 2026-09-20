@@ -10,7 +10,7 @@
         class="input"
         placeholder="Иванов Артём П."
         [value]="draft().patientName"
-        (input)="drafts.patch({ patientName: $any($event.target).value })"
+        (input)="drafts.patch({ patientName: valueOf($event) })"
       />
     </label>
   </div>
@@ -43,7 +43,7 @@
         <select
           class="select"
           [value]="draft().workType"
-          (change)="drafts.patch({ workType: $any($event.target).value })"
+          (change)="drafts.patch({ workType: valueOf($event) })"
         >
           <option value="" disabled>Выбрать</option>
           @for (type of workTypes; track type) {
@@ -65,7 +65,7 @@
           type="date"
           class="select"
           [value]="draft().dueDate"
-          (change)="drafts.patch({ dueDate: $any($event.target).value })"
+          (change)="drafts.patch({ dueDate: valueOf($event) })"
         />
       </span>
     </div>
@@ -80,7 +80,7 @@
         <select
           class="select"
           [value]="draft().shade"
-          (change)="drafts.patch({ shade: $any($event.target).value })"
+          (change)="drafts.patch({ shade: valueOf($event) })"
         >
           <option value="" disabled>Выбрать</option>
           @for (shade of shades; track shade) {
@@ -171,7 +171,7 @@
       rows="3"
       placeholder="Например: уступ 0.8 мм, контакт с соседними плотный…"
       [value]="draft().comment"
-      (input)="drafts.patch({ comment: $any($event.target).value })"
+      (input)="drafts.patch({ comment: valueOf($event) })"
     ></textarea>
   </div>
 </div>

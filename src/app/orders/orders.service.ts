@@ -4,14 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { API_BASE, describeHttpError } from '../core/api';
 import { AuthService } from '../core/auth.service';
 import { parseOrder, parseOrderList, parsePeople, PersonOption } from './order.mapper';
-import {
-  FileKind,
-  Order,
-  OrderStatus,
-  ORDER_STATUS_LABEL,
-  nextStatus,
-  statusIndex,
-} from './order.model';
+import { FileKind, Order, OrderStatus, nextStatus, statusIndex } from './order.model';
 import { sortTeeth } from './teeth';
 
 /** Справочники формы: фиксированные номенклатуры, у API отдельной ручки для них нет. */
@@ -63,19 +56,27 @@ export class OrdersService {
   readonly techniciansError = this._techniciansError.asReadonly();
 
   private inFlight: Promise<void> | null = null;
+  /** Инвалидирует ответы, начатые до смены роли. */
+  private generation = 0;
 
   private readonly auth = inject(AuthService);
 
   constructor() {
+    let previousRole = this.auth.role();
+
     // Роль сменилась (выбрали или сбросили) — загруженное к новой не относится.
     effect(() => {
-      this.auth.role();
+      const role = this.auth.role();
+      if (role === previousRole) return;
+
+      previousRole = role;
       untracked(() => this.reset());
     });
   }
 
   /** Чистит кеш: всё, что было загружено, относилось к прошлой роли. */
   reset(): void {
+    this.generation += 1;
     this.inFlight = null;
     this._orders.set([]);
     this._technicians.set([]);
@@ -86,19 +87,32 @@ export class OrdersService {
 
   /** Список заказов. Параллельные вызовы (два экрана сразу) ждут один запрос. */
   loadOrders(): Promise<void> {
-    return (this.inFlight ??= this.fetchOrders().finally(() => {
-      this.inFlight = null;
-    }));
+    if (this.inFlight) return this.inFlight;
+
+    const generation = this.generation;
+    const request = this.fetchOrders(generation).finally(() => {
+      // Старый запрос не должен затереть ссылку на новый, запущенный после reset().
+      if (this.inFlight === request) this.inFlight = null;
+    });
+
+    this.inFlight = request;
+
+    return request;
   }
 
-  private async fetchOrders(): Promise<void> {
+  private async fetchOrders(generation: number): Promise<void> {
     this._state.set('loading');
 
     try {
-      this._orders.set(parseOrderList(await this.get('/orders')));
+      const orders = parseOrderList(await this.get('/orders'));
+      if (generation !== this.generation) return;
+
+      this._orders.set(orders);
       this._error.set('');
       this._state.set('ready');
     } catch (error) {
+      if (generation !== this.generation) return;
+
       this._error.set(describeHttpError(error));
       this._state.set('error');
     }
@@ -109,25 +123,40 @@ export class OrdersService {
    * поэтому заказ всегда дотягиваем отдельным запросом и кладём в тот же кеш.
    */
   async loadOrder(id: string): Promise<void> {
+    const generation = this.generation;
     if (this._state() === 'idle') this._state.set('loading');
 
     try {
-      this.upsert(parseOrder(await this.get(`/orders/${id}`), `GET /orders/${id}`));
+      const order = parseOrder(await this.get(`/orders/${id}`), `GET /orders/${id}`);
+      if (generation !== this.generation) return;
+
+      this.upsert(order);
       this._error.set('');
       this._state.set('ready');
     } catch (error) {
+      if (generation !== this.generation) return;
+
       this._error.set(describeHttpError(error));
       this._state.set('error');
     }
   }
 
   async loadTechnicians(): Promise<void> {
+    const generation = this.generation;
+
     try {
-      this._technicians.set(
-        parsePeople(await this.get('/technicians'), 'technician', 'GET /technicians'),
+      const technicians = parsePeople(
+        await this.get('/technicians'),
+        'technician',
+        'GET /technicians',
       );
+      if (generation !== this.generation) return;
+
+      this._technicians.set(technicians);
       this._techniciansError.set('');
     } catch (error) {
+      if (generation !== this.generation) return;
+
       // Без списка исполнителей заказ не отправить — причину показываем в форме.
       this._techniciansError.set(describeHttpError(error));
     }
@@ -192,7 +221,7 @@ export class OrdersService {
       .filter((order) => order.status === 'sent')
       .map((order) => order.id);
 
-    for (const id of ids) await this.setStatus(id, 'accepted');
+    await Promise.all(ids.map((id) => this.setStatus(id, 'accepted')));
 
     return ids.length;
   }
@@ -208,11 +237,6 @@ export class OrdersService {
     } catch {
       // Отметка о прочтении — не то, ради чего стоит показывать ошибку.
     }
-  }
-
-  /** Текст уведомления, которое бот отправит второй стороне. */
-  notificationText(order: Order, status: OrderStatus): string {
-    return `Заказ №${order.id} · ${order.patientShort} — статус изменён: ${ORDER_STATUS_LABEL[status]}.`;
   }
 
   private get(path: string): Promise<unknown> {

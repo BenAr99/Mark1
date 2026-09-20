@@ -25,12 +25,6 @@
     <button type="button" class="strip__add" aria-label="Добавить файл" (click)="picker.click()">
       +
     </button>
-    <input
-      #picker
-      type="file"
-      multiple
-      hidden
-      (change)="add.emit($any($event.target).files); $any($event.target).value = ''"
-    />
+    <input #picker type="file" multiple hidden (change)="selectFiles($event)" />
   }
 </div>

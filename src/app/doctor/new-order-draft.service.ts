@@ -1,4 +1,5 @@
 import { computed, Service, signal } from '@angular/core';
+import { parseFileKind } from '../orders/order.mapper';
 import { OrderFile } from '../orders/order.model';
 
 /** Как трактовать выбранные зубы — вопрос со схемы FDI (frame 4:148). */
@@ -77,7 +78,7 @@ export class NewOrderDraftService {
     const files: OrderFile[] = Array.from(list).map((file) => ({
       id: crypto.randomUUID(),
       name: file.name,
-      kind: fileKind(file.name),
+      kind: parseFileKind(file.name),
     }));
 
     this._draft.update((draft) => ({ ...draft, files: [...draft.files, ...files] }));
@@ -93,13 +94,4 @@ export class NewOrderDraftService {
   reset(): void {
     this._draft.set(EMPTY_DRAFT);
   }
-}
-
-function fileKind(name: string): OrderFile['kind'] {
-  const ext = name.split('.').pop()?.toLowerCase();
-
-  if (ext === 'stl' || ext === 'ply' || ext === 'obj') return 'stl';
-  if (ext === 'jpg' || ext === 'jpeg' || ext === 'png' || ext === 'heic') return 'image';
-
-  return 'other';
 }

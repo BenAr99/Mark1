@@ -21,24 +21,31 @@ const DATE_TIME = new Intl.DateTimeFormat('ru-RU', {
 
 /** «12 сент.» */
 export function shortDate(iso: string): string {
-  if (!iso) return 'не указан';
-  return SHORT_DATE.format(new Date(iso));
+  const date = parseDate(iso);
+
+  return date ? SHORT_DATE.format(date) : 'не указан';
 }
 
 /** «12 сентября» */
 export function longDate(iso: string): string {
-  if (!iso) return 'Не указан';
-  return LONG_DATE.format(new Date(iso));
+  const date = parseDate(iso);
+
+  return date ? LONG_DATE.format(date) : 'Не указан';
 }
 
 /** «5 сент., 10:12» */
 export function dateTime(iso: string): string {
-  return DATE_TIME.format(new Date(iso)).replace(' в ', ', ');
+  const date = parseDate(iso);
+
+  return date ? DATE_TIME.format(date).replace(' в ', ', ') : 'Не указано';
 }
 
 /** Целых суток до срока; отрицательное — просрочено. */
-export function daysUntil(iso: string, from: Date = new Date()): number {
-  const due = startOfDay(new Date(iso));
+export function daysUntil(iso: string, from: Date = new Date()): number | null {
+  const parsedDue = parseDate(iso);
+  if (!parsedDue || Number.isNaN(from.getTime())) return null;
+
+  const due = startOfDay(parsedDue);
   const today = startOfDay(from);
 
   return Math.round((due.getTime() - today.getTime()) / 86_400_000);
@@ -48,6 +55,7 @@ export function daysUntil(iso: string, from: Date = new Date()): number {
 export function dueSuffix(iso: string, from: Date = new Date()): string {
   const days = daysUntil(iso, from);
 
+  if (days === null) return '';
   if (days < 0) return `(просрочен на ${-days} ${plural(-days, 'день', 'дня', 'дней')})`;
   if (days === 0) return '(сегодня)';
   if (days > 3) return '';
@@ -57,4 +65,24 @@ export function dueSuffix(iso: string, from: Date = new Date()): string {
 
 function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+/** Дату без времени читаем в локальной зоне, чтобы она не сдвигалась на соседний день. */
+function parseDate(value: string): Date | null {
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+
+  if (dateOnly) {
+    const year = Number(dateOnly[1]);
+    const month = Number(dateOnly[2]);
+    const day = Number(dateOnly[3]);
+    const date = new Date(year, month - 1, day);
+
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+      ? date
+      : null;
+  }
+
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime()) ? null : date;
 }

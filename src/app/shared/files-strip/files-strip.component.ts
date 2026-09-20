@@ -27,4 +27,12 @@ export class FilesStripComponent {
   protected label(file: OrderFile): string {
     return file.name.split('.').pop()?.toUpperCase() || 'FILE';
   }
+
+  protected selectFiles(event: Event): void {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
+
+    this.add.emit(input.files);
+    input.value = '';
+  }
 }

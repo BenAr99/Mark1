@@ -6,9 +6,13 @@ Telegram Mini App: связка **врач ↔ зубной техник**. Angu
 
 ## Запуск
 
+Нужен Node.js 22.22.3+, 24.15.0+ или 26+. Более ранние патчи этих веток Angular CLI 22.1
+не запускает.
+
 ```bash
 npm ci
 npm start          # http://localhost:4205
+npm run typecheck  # TypeScript + Angular-шаблоны
 ```
 
 Прод-сборка (как в CI): `npx ng build --base-href /Mark1/`.

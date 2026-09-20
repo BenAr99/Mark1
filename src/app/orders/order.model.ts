@@ -29,14 +29,6 @@ export const ORDER_STATUS_OWNER: Record<OrderStatus, Role> = {
   delivered: 'doctor',
 };
 
-export const ORDER_STATUS_HINT: Record<OrderStatus, string> = {
-  sent: 'Заказ ушёл выбранному технику',
-  accepted: 'Техник подтвердил, что берёт в работу',
-  in_progress: 'Работа начата',
-  ready: 'Работа завершена, ждёт доставки',
-  delivered: 'Врач подтвердил получение',
-};
-
 export interface Person {
   id: string;
   role: Role;
