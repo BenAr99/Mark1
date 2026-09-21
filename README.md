@@ -108,6 +108,7 @@ src/app/
 | `POST /orders/{id}/status`                 | сменить статус                            |
 | `POST /orders/{id}/read`                   | отметить историю прочитанной              |
 | `GET /technicians`                         | техники для выбора, с полем `load`        |
+| `GET /doctors`                             | врачи для фильтра журнала                 |
 | `POST /me/role`                            | закрепить роль за аккаунтом               |
 | `GET /audit-log`                           | общий журнал действий                     |
 | `GET /orders/{id}/audit-log`               | журнал действий конкретного заказа        |
@@ -119,13 +120,18 @@ src/app/
 ```json
 {
   "id": "audit-42",
-  "action": "orderStatusChanged",
   "orderId": "123",
-  "actor": { "name": "Рустам Ахметов", "role": "technician" },
-  "createdAt": "2026-09-20T14:30:00Z",
-  "description": "Статус изменён: Отправлено → Принято"
+  "action": "status_changed",
+  "actor": { "id": "7", "name": "Рустам Ахметов", "role": "technician" },
+  "fromStatus": "sent",
+  "toStatus": "accepted",
+  "fileName": null,
+  "at": "2026-09-20T14:30:00Z"
 }
 ```
+
+Общий журнал фильтруется по номеру карточки, действующему лицу, дате и имени пациента.
+Поисковый селектор действующего лица объединяет результаты `GET /doctors` и `GET /technicians`.
 
 Все поля собственного API проекта возвращаются только в `camelCase`. Форматы внешнего Telegram
 API (`auth_date`, `first_name` и другие) сохраняют заданные Telegram имена.

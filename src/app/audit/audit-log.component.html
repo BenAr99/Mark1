@@ -1,24 +1,110 @@
 <app-tg-header title="История действий" [subtitle]="subtitle()" [showBack]="true" (back)="back()" />
 
 <div class="df-content audit-content">
-  <form class="search" (submit)="$event.preventDefault(); search(orderId.value)">
-    <label class="search__label" for="audit-order-id">Поиск по номеру заказа</label>
-    <div class="search__controls">
-      <input
-        #orderId
-        id="audit-order-id"
-        class="search__input"
-        type="search"
-        inputmode="text"
-        autocomplete="off"
-        placeholder="Например, 123"
-        aria-label="Номер заказа"
-        [value]="activeOrderId()"
-      />
-      @if (activeOrderId()) {
-        <button type="button" class="search__clear" (click)="clear(orderId)">Все</button>
+  <form class="filters" (submit)="$event.preventDefault(); applyFilters()">
+    <div class="filters__grid">
+      <label class="field">
+        <span class="field__label">Номер карточки</span>
+        <input
+          class="field__input"
+          type="search"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          autocomplete="off"
+          placeholder="Например, 123"
+          [value]="orderId()"
+          (input)="orderId.set(valueOf($event))"
+        />
+      </label>
+
+      <label class="field">
+        <span class="field__label">Имя пациента</span>
+        <input
+          class="field__input"
+          type="search"
+          autocomplete="off"
+          placeholder="Например, Иванов"
+          [value]="patientName()"
+          (input)="patientName.set(valueOf($event))"
+        />
+      </label>
+
+      <label class="field field--date">
+        <span class="field__label">Дата действия</span>
+        <input
+          class="field__input"
+          type="date"
+          [value]="date()"
+          (change)="date.set(valueOf($event))"
+        />
+      </label>
+    </div>
+
+    <div class="actor-picker">
+      <span class="field__label">Действующее лицо</span>
+      <button
+        type="button"
+        class="actor-picker__trigger"
+        [attr.aria-expanded]="actorPickerOpen()"
+        (click)="actorPickerOpen.set(!actorPickerOpen())"
+      >
+        @if (selectedActor(); as actor) {
+          <span class="actor-picker__selected">
+            <span>{{ actor.name }}</span>
+            <span class="actor-picker__meta">{{ roleLabel(actor.role) }} · {{ actor.org }}</span>
+          </span>
+          <span
+            class="actor-picker__clear"
+            role="button"
+            tabindex="0"
+            aria-label="Очистить действующее лицо"
+            (click)="clearActor($event)"
+            (keydown.enter)="clearActor($event)"
+            >×</span
+          >
+        } @else {
+          <span class="actor-picker__placeholder">Все врачи и техники</span>
+          <span class="df-chevron" aria-hidden="true">›</span>
+        }
+      </button>
+
+      @if (actorPickerOpen()) {
+        <div class="actor-picker__menu">
+          <input
+            class="field__input actor-picker__search"
+            type="search"
+            autocomplete="off"
+            placeholder="Поиск по имени, username или организации"
+            [value]="actorQuery()"
+            (input)="actorQuery.set(valueOf($event))"
+          />
+
+          <div class="actor-picker__options">
+            @for (actor of filteredActors(); track actor.id) {
+              <button type="button" class="actor-option" (click)="selectActor(actor.id)">
+                <span class="actor-option__name">{{ actor.name }}</span>
+                <span class="actor-option__meta">
+                  {{ roleLabel(actor.role) }} · {{ actor.org }}
+                  @if (actor.telegram) {
+                    · &#64;{{ actor.telegram }}
+                  }
+                </span>
+              </button>
+            } @empty {
+              <p class="actor-picker__empty">
+                {{ actorsError() || 'Действующие лица не найдены.' }}
+              </p>
+            }
+          </div>
+        </div>
       }
-      <button type="submit" class="search__submit">Найти</button>
+    </div>
+
+    <div class="filters__actions">
+      @if (hasFilters()) {
+        <button type="button" class="filters__reset" (click)="resetFilters()">Сбросить</button>
+      }
+      <button type="submit" class="filters__submit">Применить</button>
     </div>
   </form>
 
@@ -40,29 +126,25 @@
           <div class="entry__card">
             <div class="entry__heading">
               <p class="entry__action">{{ actionLabel(entry.action) }}</p>
-              <time class="entry__time" [attr.datetime]="entry.createdAt">
-                {{ formatDate(entry.createdAt) }}
+              <time class="entry__time" [attr.datetime]="entry.at">
+                {{ formatDate(entry.at) }}
               </time>
             </div>
 
-            <p class="entry__description">{{ entry.description }}</p>
+            <p class="entry__description">{{ actionDescription(entry) }}</p>
 
             <div class="entry__meta">
-              <span>{{ entry.actor?.name ?? 'Система' }}</span>
-              @if (entry.actor; as actor) {
-                <span class="df-who" [attr.data-role]="actor.role">
-                  {{ actor.role === 'doctor' ? 'Врач' : 'Техник' }}
-                </span>
+              <span>{{ entry.actor.name }}</span>
+              @if (entry.actor.role; as role) {
+                <span class="df-who" [attr.data-role]="role">{{ roleLabel(role) }}</span>
               }
-              @if (entry.orderId) {
-                <span class="entry__order">Заказ №{{ entry.orderId }}</span>
-              }
+              <span class="entry__order">Заказ №{{ entry.orderId }}</span>
             </div>
           </div>
         </article>
       } @empty {
         <p class="empty">
-          {{ activeOrderId() ? 'По этому заказу действий пока нет.' : 'История пока пуста.' }}
+          {{ hasFilters() ? 'По выбранным фильтрам ничего не найдено.' : 'История пока пуста.' }}
         </p>
       }
     </section>

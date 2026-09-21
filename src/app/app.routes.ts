@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
-import { authorizedGuard, noRoleGuard, roleGuard } from './core/role.guard';
+import { noRoleGuard, roleGuard } from './core/role.guard';
 import { SessionService } from './core/session.service';
 
 export const routes: Routes = [
@@ -26,13 +26,13 @@ export const routes: Routes = [
   },
   {
     path: 'audit-log',
-    canActivate: [authorizedGuard],
+    canActivate: [roleGuard('doctor')],
     loadComponent: () =>
       import('./audit/audit-log.component').then((module) => module.AuditLogComponent),
   },
   {
     path: 'orders/:orderId/audit-log',
-    canActivate: [authorizedGuard],
+    canActivate: [roleGuard('doctor')],
     loadComponent: () =>
       import('./audit/audit-log.component').then((module) => module.AuditLogComponent),
   },
