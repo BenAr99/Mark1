@@ -81,7 +81,14 @@ export class OrdersService {
       if (role === previousRole) return;
 
       previousRole = role;
-      untracked(() => this.reset());
+      untracked(() => {
+        this.reset();
+
+        // Компонент новой роли мог успеть запустить GET /orders до этого effect.
+        // reset() намеренно инвалидирует такой запрос, поэтому сразу запускаем
+        // свежий уже с новым токеном и не оставляем экран пустым до перезагрузки.
+        if (role) void this.loadOrders();
+      });
     });
   }
 
