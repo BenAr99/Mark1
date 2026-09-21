@@ -11,7 +11,7 @@
           inputmode="numeric"
           pattern="[0-9]*"
           autocomplete="off"
-          placeholder="Например, 123"
+          placeholder=""
           [value]="orderId()"
           (input)="orderId.set(valueOf($event))"
         />
@@ -23,7 +23,7 @@
           class="field__input"
           type="search"
           autocomplete="off"
-          placeholder="Например, Иванов"
+          placeholder=""
           [value]="patientName()"
           (input)="patientName.set(valueOf($event))"
         />
@@ -63,7 +63,7 @@
             >×</span
           >
         } @else {
-          <span class="actor-picker__placeholder">Все врачи и техники</span>
+          <span class="actor-picker__placeholder">Сотрудники</span>
           <span class="df-chevron" aria-hidden="true">›</span>
         }
       </button>
@@ -74,7 +74,7 @@
             class="field__input actor-picker__search"
             type="search"
             autocomplete="off"
-            placeholder="Поиск по имени, username или организации"
+            placeholder="Поиск по имени сотрудника"
             [value]="actorQuery()"
             (input)="actorQuery.set(valueOf($event))"
           />
